@@ -1,0 +1,360 @@
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
+import { isTokenExpired } from "../utils/auth"; // path as per your structure
+import { jwtDecode } from "jwt-decode";
+
+import Home from "./pages/Home";
+
+import Notfound from "./pages/Notfound";
+import Sidebar from "./components/Sidebar";
+import BlogManagementForm from "./BlogsManagement/BlogManagementForm";
+import BlogManagementDashboard from "./BlogsManagement/BlogManagementDashboard";
+import BlogList from "./BlogsManagement/BlogList";
+import BlogEditForm from "./BlogsManagement/BlogEditForm";
+import BlogView from "./BlogsManagement/BlogView";
+// Dynamic Form Components
+import FormManagementDashboard from "./DynamicForms/FormManagementDashboard";
+import FormBuilder from "./DynamicForms/FormBuilder";
+import FormSubmissionsView from "./DynamicForms/FormSubmissionsView";
+import FormPreviewPage from "./DynamicForms/FormPreviewPage";
+import LeadsManagement from "./DynamicForms/LeadsManagement";
+import TeamManagement from "./TeamManagement/TeamManagement";
+import TestimonialManagement from "./TestimonialManagement/TestimonialManagement";
+import StatManagement from "./StatManagement/StatManagement";
+// import AdminAuth from "./components/AdminAuth";
+import AnnouncementForm from "./Announcement/AnnouncementForm";
+import AnnouncementList from "./Announcement/AnnouncementList";
+import AnnouncementPreview from "./Announcement/AnnouncementPreview";
+import EmailTemplateManagement from "./DynamicForms/EmailTemplateManagement";
+import SignUp from "./pages/SignUp";
+import Login from "./pages/Login";
+
+// Donation Management Components
+import DonationDashboard from "./DonationManagement/DonationDashboard";
+import DonationForm from "./DonationManagement/DonationForm";
+import DonationView from "./DonationManagement/DonationView";
+import UTMTrackingDashboard from "./DonationManagement/UTMTrackingDashboard";
+import DonationKitManagement from "./DonationKitManagement/DonationKitManagement";
+import DonationKitList from "./DonationKitManagement/DonationKitList";
+import DonationKitForm from "./DonationKitManagement/DonationKitForm";
+
+// Grocery Item Management Components
+import GroceryItemList from "./GroceryItemManagement/GroceryItemList";
+import GroceryItemForm from "./GroceryItemManagement/GroceryItemForm";
+
+// Campaigner Campaign Management Components
+import CampaignerCampaignList from "./CampaignerCampaignManagement/CampaignerCampaignList";
+import CampaignerCampaignForm from "./CampaignerCampaignManagement/CampaignerCampaignForm";
+
+// Campaign Management Components
+import CampaignList from "./CampaignManagement/CampaignList";
+import CampaignForm from "./CampaignManagement/CampaignForm";
+
+// Photo Gallery Components
+import PhotoGalleryForm from "./PhotoGallery/PhotoGalleryForm";
+import PhotoGalleryList from "./PhotoGallery/PhotoGalleryList";
+
+// Video Gallery Components
+import VideoGalleryForm from "./VideoGallery/VideoGalleryForm";
+import VideoGalleryList from "./VideoGallery/VideoGalleryList";
+
+// Donor Wall Components
+import DonorWallForm from "./DonorWall/DonorWallForm";
+import DonorWallList from "./DonorWall/DonorWallList";
+
+// Event Management Components
+import EventManagementList from "./EventManagement/EventManagmentList";
+
+// Donation Gallery Components
+import DonationGalleryList from "./DonationGallery/DonationGalleryList";
+import DonationGalleryForm from "./DonationGallery/DonationGalleryForm";
+
+// Home Gallery Components
+import HomeGalleryList from "./HomeGallery/HomeGalleryList";
+import HomeGalleryForm from "./HomeGallery/HomeGalleryForm";
+
+// About Gallery Components
+import AboutGalleryList from "./AboutGallery/AboutGalleryList";
+import AboutGalleryForm from "./AboutGallery/AboutGalleryForm";
+
+import GalleryDashboard from "./pages/GalleryDashboard";
+
+// Banner Management & Career Components
+import BannerManagement from "./pages/BannerManagement";
+import HomeBannerManagement from "./pages/HomeBannerManagement";
+import Donationamount from "./pages/Donationamount";
+import CareerForm from "./pages/CareerForm";
+import AppliedStatus from "./pages/appliedstatus";
+import GuidanceRequests from "./pages/GuidanceRequests";
+function AppWrapper() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const token = localStorage.getItem("token");
+  const isLoggedIn = token && !isTokenExpired(token);
+
+  useEffect(() => {
+    if (token && isTokenExpired(token)) {
+      localStorage.removeItem("token");
+      navigate("/"); // redirect to login
+    }
+  }, [token, navigate]);
+  const shouldHideSidebar = location.pathname === "/utm-tracking-dashboard";
+
+  return (
+    <div className="flex">
+      {/* <Sidebar /> */}
+      {isLoggedIn && !shouldHideSidebar && <Sidebar />}
+
+      <main
+        className={
+          isLoggedIn && !shouldHideSidebar
+            ? "flex-grow ml-0 md:ml-64 transition-all duration-300"
+            : "flex-grow"
+        }
+      >
+        <Routes>
+          <Route index element={<Login />} />
+
+          {/* Auth routes - accessible to everyone */}
+          <Route path="/signUp" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
+
+          {/* <Route path="*" element={<Notfound />} /> */}
+          {isLoggedIn ? (
+            <>
+              {/* Blog Management Routes */}
+              <Route path="/dashboard" element={<Home />} />
+              <Route path="/banner" element={<BannerManagement />} />
+              <Route path="/home-banner" element={<HomeBannerManagement />} />
+              <Route path="/donation-amount" element={<Donationamount />} />
+              <Route path="/guidance-requests" element={<GuidanceRequests />} />
+
+              <Route path="/apply" element={<CareerForm />} />
+              <Route path="/blog-management" element={<BlogEditForm />} />
+              <Route
+                path="/blog-management/dashboard"
+                element={<BlogManagementDashboard />}
+              />
+              <Route path="/blog-management/list" element={<BlogList />} />
+              <Route
+                path="/blog-management/create"
+                element={<BlogEditForm />}
+              />
+              <Route
+                path="/blog-management/edit/:blogId"
+                element={<BlogEditForm />}
+              />
+              <Route
+                path="/blog-management/view/:blogId"
+                element={<BlogView />}
+              />
+
+              {/* Dynamic Form Management Routes */}
+              <Route
+                path="/form-management"
+                element={<FormManagementDashboard />}
+              />
+              <Route path="/form-management/create" element={<FormBuilder />} />
+              <Route
+                path="/form-management/edit/:formId"
+                element={<FormBuilder />}
+              />
+              <Route
+                path="/form-management/submissions/:formId"
+                element={<FormSubmissionsView />}
+              />
+              <Route
+                path="/form-management/preview/:formId"
+                element={<FormPreviewPage />}
+              />
+              <Route path="/leads-management" element={<LeadsManagement />} />
+              <Route path="/teammanagement" element={<TeamManagement />} />
+              <Route
+                path="/testimonialmanagement"
+                element={<TestimonialManagement />}
+              />
+              <Route
+                path="/statmanagement"
+                element={<StatManagement />}
+              />
+              <Route path="/announcement" element={<AnnouncementForm />} />
+              <Route path="/announcement/list" element={<AnnouncementList />} />
+              <Route
+                path="/announcement/preview"
+                element={<AnnouncementPreview />}
+              />
+              <Route
+                path="/email-templates"
+                element={<EmailTemplateManagement />}
+              />
+
+              {/* Donation Management Routes */}
+              <Route
+                path="/donation-management"
+                element={<DonationDashboard />}
+              />
+              <Route
+                path="/donation-management/create"
+                element={<DonationForm />}
+              />
+              <Route
+                path="/donation-management/edit/:id"
+                element={<DonationForm />}
+              />
+              <Route
+                path="/donation-management/view/:id"
+                element={<DonationView />}
+              />
+              <Route
+                path="/utm-tracking-dashboard"
+                element={<UTMTrackingDashboard />}
+              />
+              <Route
+                path="/donation-kit-management"
+                element={<DonationKitManagement />}
+              />
+              <Route
+                path="/donation-kit-management/kits"
+                element={<DonationKitList />}
+              />
+              <Route
+                path="/donation-kit-management/kits/create"
+                element={<DonationKitForm />}
+              />
+              <Route
+                path="/donation-kit-management/kits/edit/:id"
+                element={<DonationKitForm />}
+              />
+
+              {/* Grocery Item Management Routes */}
+              <Route
+                path="/grocery-item-management/items"
+                element={<GroceryItemList />}
+              />
+              <Route
+                path="/grocery-item-management/items/create"
+                element={<GroceryItemForm />}
+              />
+              <Route
+                path="/grocery-item-management/items/edit/:id"
+                element={<GroceryItemForm />}
+              />
+
+              {/* Campaigner Campaign Management Routes */}
+              <Route
+                path="/campaigner-campaign-management/campaigns"
+                element={<CampaignerCampaignList />}
+              />
+              <Route
+                path="/campaigner-campaign-management/campaigns/create"
+                element={<CampaignerCampaignForm />}
+              />
+              <Route
+                path="/campaigner-campaign-management/campaigns/edit/:id"
+                element={<CampaignerCampaignForm />}
+              />
+
+              {/* Campaign Management Routes */}
+              <Route
+                path="/campaign-management/list"
+                element={<CampaignList />}
+              />
+              <Route
+                path="/campaign-management/create"
+                element={<CampaignForm />}
+              />
+              <Route
+                path="/campaign-management/edit/:id"
+                element={<CampaignForm />}
+              />
+
+              {/* Photo Gallery Routes */}
+              <Route
+                path="/photo-gallery"
+                element={<PhotoGalleryList />}
+              />
+              <Route
+                path="/photo-gallery/create"
+                element={<PhotoGalleryForm />}
+              />
+              <Route
+                path="/photo-gallery/edit/:id"
+                element={<PhotoGalleryForm />}
+              />
+
+              {/* Video Gallery Routes */}
+              <Route
+                path="/video-gallery"
+                element={<VideoGalleryList />}
+              />
+              <Route
+                path="/video-gallery/create"
+                element={<VideoGalleryForm />}
+              />
+              <Route
+                path="/video-gallery/edit/:id"
+                element={<VideoGalleryForm />}
+              />
+
+              {/* Donor Wall Routes */}
+              <Route
+                path="/donor-wall"
+                element={<DonorWallList />}
+              />
+              <Route
+                path="/donor-wall/create"
+                element={<DonorWallForm />}
+              />
+              <Route
+                path="/donor-wall/edit/:id"
+                element={<DonorWallForm />}
+              />
+
+              {/* Public Form Route - This would typically be in your frontend app */}
+              <Route path="/forms/:page" element={<FormPreviewPage />} />
+              <Route path="/events/list" element={<EventManagementList />} />
+
+              {/* Gallery Routes */}
+              <Route path="/gallery-management" element={<GalleryDashboard />} />
+              
+              <Route path="/donation-gallery" element={<DonationGalleryList />} />
+              <Route path="/donation-gallery/create" element={<DonationGalleryForm />} />
+              <Route path="/donation-gallery/edit/:id" element={<DonationGalleryForm />} />
+
+              <Route path="/home-gallery" element={<HomeGalleryList />} />
+              <Route path="/home-gallery/create" element={<HomeGalleryForm />} />
+              <Route path="/home-gallery/edit/:id" element={<HomeGalleryForm />} />
+
+              <Route path="/about-gallery" element={<AboutGalleryList />} />
+              <Route path="/about-gallery/create" element={<AboutGalleryForm />} />
+              <Route path="/about-gallery/edit/:id" element={<AboutGalleryForm />} />
+
+              <Route path="/appliedstatus" element={<AppliedStatus />} />
+            </>
+          ) : (
+            <Route path="*" element={<Login />} />
+          )}
+        </Routes>
+      </main>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppWrapper />
+    </Router>
+  );
+}
+
+
+
+export default App;

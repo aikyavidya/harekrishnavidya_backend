@@ -1,0 +1,202 @@
+const mongoose = require('mongoose');
+
+const donationSchema = new mongoose.Schema({
+  // Seva Details
+  sevaName: {
+    type: String,
+    required: false, // Made optional for Razorpay sync
+    trim: true
+  },
+  sevaType: {
+    type: String,
+    required: false, // Made optional for Razorpay sync
+    trim: true
+  },
+  sevaAmount: {
+    type: Number,
+    required: false, // Made optional for Razorpay sync
+    min: 1
+  },
+
+  // Donor Information
+  donorName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  donorEmail: {
+    type: String,
+    required: true,
+    trim: true,
+    lowercase: true
+  },
+  donorPhone: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  donorType: {
+    type: String,
+    enum: ['Indian Citizen', 'Foreign Citizen', 'individual'],
+    required: false // Made optional for Razorpay sync
+  },
+
+  // Payment Details
+  razorpayPaymentId: {
+    type: String,
+    sparse: true // This allows multiple null values
+  },
+  razorpayOrderId: {
+    type: String,
+    sparse: true // This allows multiple null values
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'completed', 'failed', 'refunded'],
+    default: 'pending'
+  },
+  paymentMethod: {
+    type: String,
+    trim: true
+  },
+  amount: {
+    type: Number,
+    required: true,
+    min: 1
+  },
+  currency: {
+    type: String,
+    default: 'INR'
+  },
+
+  // Additional Details
+  description: {
+    type: String,
+    trim: true
+  },
+  receipt: {
+    type: String,
+    trim: true
+  },
+  notes: {
+    type: String,
+    trim: true
+  },
+  isAnonymous: {
+    type: Boolean,
+    default: false
+  },
+  campaign: {
+    type: String,
+    trim: true
+  },
+
+  // Address fields for Maha Prasadam delivery and 80G tax exemption (optional)
+  wantsMahaPrasadam: {
+    type: Boolean,
+    default: false
+  },
+  wants80G: {
+    type: Boolean,
+    default: false
+  },
+  address: {
+    type: String,
+    trim: true,
+    required: false // Optional for Razorpay sync compatibility
+  },
+  houseApartment: {
+    type: String,
+    trim: true,
+    required: false
+  },
+  village: {
+    type: String,
+    trim: true,
+    required: false
+  },
+  district: {
+    type: String,
+    trim: true,
+    required: false
+  },
+  state: {
+    type: String,
+    trim: true,
+    required: false
+  },
+  pinCode: {
+    type: String,
+    trim: true,
+    required: false
+  },
+  landmark: {
+    type: String,
+    trim: true,
+    required: false
+  },
+  panNumber: {
+    type: String,
+    trim: true,
+    required: false,
+    uppercase: true
+  },
+
+  // UTM Tracking Parameters
+  utmSource: {
+    type: String,
+    trim: true
+  },
+  utmMedium: {
+    type: String,
+    trim: true
+  },
+  utmCampaign: {
+    type: String,
+    trim: true
+  },
+  utmTerm: {
+    type: String,
+    trim: true
+  },
+  utmContent: {
+    type: String,
+    trim: true
+  },
+
+  // Metadata
+  metadata: {
+    paymentMethod: String,
+    bank: String,
+    cardId: String,
+    wallet: String,
+    vpa: String,
+    email: String,
+    contact: String,
+    status: String
+  },
+
+  // Timestamps
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+}, {
+  timestamps: true
+});
+
+// Indexes for better query performance
+// Remove the unique constraint from razorpayPaymentId and razorpayOrderId
+donationSchema.index({ razorpayPaymentId: 1 }, { sparse: true });
+donationSchema.index({ razorpayOrderId: 1 }, { sparse: true });
+donationSchema.index({ donorEmail: 1 });
+donationSchema.index({ paymentStatus: 1 });
+donationSchema.index({ createdAt: -1 });
+donationSchema.index({ sevaType: 1 });
+donationSchema.index({ donorType: 1 });
+
+module.exports = mongoose.model('Donation', donationSchema);
