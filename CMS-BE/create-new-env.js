@@ -7,7 +7,7 @@ const envContent = `# Database Configuration
 MONGO_URI=mongodb+srv://garibesangmesh:nDIOSD3XXaV75p8h@cluster0.hv3lvyd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 
 # Server Configuration
-PORT=5000
+PORT=5021
 NODE_ENV=development
 
 # JWT Configuration
