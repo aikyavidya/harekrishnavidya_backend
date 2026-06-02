@@ -4,7 +4,7 @@ const path = require('path');
 const envPath = path.join(__dirname, '.env');
 
 const envContent = `# Database Configuration
-MONGO_URI=mongodb+srv://garibesangmesh:nDIOSD3XXaV75p8h@cluster0.hv3lvyd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+MONGO_URI=MONGO_URI=mongodb+srv://harekrishnamovementdigital_db_user:ZUlKBnZyR3u50Rbs@cluster0.hov6aes.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 
 # Server Configuration
 PORT=5021
