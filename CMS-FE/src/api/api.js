@@ -1,6 +1,6 @@
 // API Base URL Configuration
 // Default: https://api.harekrishnavidya.org
-// To use local backend, set: VITE_API_BASE_URL=http://localhost:5000
+// To use local backend, set: VITE_API_BASE_URL=http://localhost:5021
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || 'https://api.harekrishnavidya.org';
 

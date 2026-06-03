@@ -5,7 +5,7 @@ Complete API documentation for the Donor Wall management system.
 ## Base URL
 
 ```
-http://localhost:5000/api/donor-wall
+http://localhost:5021/api/donor-wall
 ```
 
 ## Data Model
@@ -548,7 +548,7 @@ Avatar initials are automatically generated from the donor's full name:
 ```javascript
 // Create a new donor
 const createDonor = async () => {
-  const response = await fetch('http://localhost:5000/api/donor-wall', {
+  const response = await fetch('http://localhost:5021/api/donor-wall', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -568,14 +568,14 @@ const createDonor = async () => {
 
 // Get all donors with filters
 const getDonors = async () => {
-  const response = await fetch('http://localhost:5000/api/donor-wall?tier=Gold&isVisible=true&page=1');
+  const response = await fetch('http://localhost:5021/api/donor-wall?tier=Gold&isVisible=true&page=1');
   const data = await response.json();
   console.log(data);
 };
 
 // Update a donor
 const updateDonor = async (id) => {
-  const response = await fetch(`http://localhost:5000/api/donor-wall/${id}`, {
+  const response = await fetch(`http://localhost:5021/api/donor-wall/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json'
@@ -591,7 +591,7 @@ const updateDonor = async (id) => {
 
 // Toggle visibility
 const toggleVisibility = async (id) => {
-  const response = await fetch(`http://localhost:5000/api/donor-wall/${id}/toggle-visibility`, {
+  const response = await fetch(`http://localhost:5021/api/donor-wall/${id}/toggle-visibility`, {
     method: 'PUT'
   });
   
@@ -601,7 +601,7 @@ const toggleVisibility = async (id) => {
 
 // Delete a donor
 const deleteDonor = async (id) => {
-  const response = await fetch(`http://localhost:5000/api/donor-wall/${id}`, {
+  const response = await fetch(`http://localhost:5021/api/donor-wall/${id}`, {
     method: 'DELETE'
   });
   
@@ -611,7 +611,7 @@ const deleteDonor = async (id) => {
 
 // Get statistics
 const getStats = async () => {
-  const response = await fetch('http://localhost:5000/api/donor-wall/stats');
+  const response = await fetch('http://localhost:5021/api/donor-wall/stats');
   const data = await response.json();
   console.log(data);
 };

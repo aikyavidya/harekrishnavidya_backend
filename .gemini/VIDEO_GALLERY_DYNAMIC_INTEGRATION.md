@@ -8,7 +8,7 @@ Successfully converted the Next.js video gallery page from static data to dynami
 ### 1. **Next.js Frontend (page.tsx)**
 
 #### API Integration
-- Added API base URL configuration: `http://localhost:5000/api`
+- Added API base URL configuration: `http://localhost:5021/api`
 - Updated `VideoItem` interface to match backend schema:
   - `_id` instead of `id`
   - `videoTitle` instead of `title`
@@ -45,15 +45,15 @@ Successfully converted the Next.js video gallery page from static data to dynami
 
 #### VideoGalleryForm.jsx
 - Already configured with API endpoints:
-  - POST: `http://localhost:5000/api/video-gallery` (Create)
-  - PUT: `http://localhost:5000/api/video-gallery/:id` (Update)
-  - GET: `http://localhost:5000/api/video-gallery/:id` (Fetch single)
+  - POST: `http://localhost:5021/api/video-gallery` (Create)
+  - PUT: `http://localhost:5021/api/video-gallery/:id` (Update)
+  - GET: `http://localhost:5021/api/video-gallery/:id` (Fetch single)
 
 #### VideoGalleryList.jsx
 - Already configured with API endpoints:
-  - GET: `http://localhost:5000/api/video-gallery` (List all)
-  - GET: `http://localhost:5000/api/video-gallery/stats` (Statistics)
-  - DELETE: `http://localhost:5000/api/video-gallery/:id` (Delete)
+  - GET: `http://localhost:5021/api/video-gallery` (List all)
+  - GET: `http://localhost:5021/api/video-gallery/stats` (Statistics)
+  - DELETE: `http://localhost:5021/api/video-gallery/:id` (Delete)
 
 ## Features Implemented
 
@@ -88,7 +88,7 @@ Backend categories are automatically mapped to frontend:
 ## API Endpoints Used
 
 ### Video Gallery API
-- **Base URL**: `http://localhost:5000/api`
+- **Base URL**: `http://localhost:5021/api`
 - **Endpoints**:
   - `GET /video-gallery` - Fetch all videos
   - `GET /video-gallery/:id` - Fetch single video

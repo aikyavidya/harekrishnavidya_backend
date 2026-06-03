@@ -5,7 +5,7 @@ This API manages photo gallery functionality for the CMS, including uploading, r
 
 ## Base URL
 ```
-http://localhost:5000/api/photo-gallery
+http://localhost:5021/api/photo-gallery
 ```
 
 ## Endpoints

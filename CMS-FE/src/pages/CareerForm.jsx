@@ -47,7 +47,7 @@
 //       data.append("cv", formData.cv);
 
 //       const res = await axios.post(
-//         "http://localhost:5000/api/career/apply",
+//         "http://localhost:5021/api/career/apply",
 //         data,
 //         {
 //           headers: { "Content-Type": "multipart/form-data" },

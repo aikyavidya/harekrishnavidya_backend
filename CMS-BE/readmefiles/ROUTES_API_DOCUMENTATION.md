@@ -21,7 +21,7 @@ Welcome to the Universal CMS Backend API! This documentation provides comprehens
 ## 🌐 Base URL
 
 ```
-http://localhost:5000/api
+http://localhost:5021/api
 ```
 
 ---
@@ -597,7 +597,7 @@ image: [file upload]
 **Response:**
 ```json
 {
-  "url": "http://localhost:5000/blogimages/image-1234567890.jpg",
+  "url": "http://localhost:5021/blogimages/image-1234567890.jpg",
   "filename": "image-1234567890.jpg"
 }
 ```

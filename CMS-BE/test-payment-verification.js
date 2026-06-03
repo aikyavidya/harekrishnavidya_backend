@@ -6,7 +6,7 @@ async function testPaymentVerification() {
   try {
     // Test the email endpoint first
     console.log('1. Testing email service endpoint...');
-    const emailResponse = await fetch('http://localhost:5000/api/donations/test-email');
+    const emailResponse = await fetch('http://localhost:5021/api/donations/test-email');
     const emailResult = await emailResponse.json();
     
     if (emailResult.success) {
@@ -28,7 +28,7 @@ async function testPaymentVerification() {
       donationId: 'test_donation_id'
     };
     
-    const response = await fetch('http://localhost:5000/api/donations/verify-payment-form', {
+    const response = await fetch('http://localhost:5021/api/donations/verify-payment-form', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

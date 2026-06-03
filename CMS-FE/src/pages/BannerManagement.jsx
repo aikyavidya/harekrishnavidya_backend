@@ -7,7 +7,7 @@
 
 // //   const fetchBanner = async () => {
 // //     try {
-// //       const res = await axios.get("http://localhost:5000/api/banner/get");
+// //       const res = await axios.get("http://localhost:5021/api/banner/get");
 // //       setBanner(res.data.url);
 // //     } catch (err) {
 // //       console.log(err);
@@ -25,7 +25,7 @@
 // //     formData.append("banner", file);
 
 // //     try {
-// //       await axios.post("http://localhost:5000/api/banner/upload", formData);
+// //       await axios.post("http://localhost:5021/api/banner/upload", formData);
 // //       alert("Uploaded!");
 // //       fetchBanner();
 // //     } catch (error) {
@@ -35,7 +35,7 @@
 
 // //   const deleteBanner = async () => {
 // //     try {
-// //       await axios.delete("http://localhost:5000/api/banner/delete");
+// //       await axios.delete("http://localhost:5021/api/banner/delete");
 // //       alert("Deleted!");
 // //       setBanner(null);
 // //     } catch (err) {
@@ -50,7 +50,7 @@
 // //       {banner ? (
 // //         <div>
 // //           <img
-// //             src={`http://localhost:5000${banner}`}
+// //             src={`http://localhost:5021${banner}`}
 // //             width="300"
 // //             style={{ borderRadius: 10 }}
 // //             alt="banner"
@@ -243,7 +243,7 @@
 //               <div className="space-y-4">
 //                 <div className="relative overflow-hidden rounded-lg">
 //                   <img
-//                     src={`http://localhost:5000${banner}?v=${bannerVersion}`}
+//                     src={`http://localhost:5021${banner}?v=${bannerVersion}`}
 //                     alt="Current banner"
 //                     className="h-48 w-full object-cover sm:h-56 lg:h-64"
 //                     onError={(e) => {

@@ -162,7 +162,7 @@ Complete implementation of the Video Gallery management system for the CMS.
 
 ### Base URL
 ```
-http://localhost:5000/api/video-gallery
+http://localhost:5021/api/video-gallery
 ```
 
 ### Endpoints

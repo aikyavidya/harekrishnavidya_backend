@@ -5,7 +5,7 @@ Complete API documentation for the Video Gallery management system.
 ## Base URL
 
 ```
-http://localhost:5000/api/video-gallery
+http://localhost:5021/api/video-gallery
 ```
 
 ## Data Model
@@ -431,7 +431,7 @@ Quality options:
 ```javascript
 // Create a new video
 const createVideo = async () => {
-  const response = await fetch('http://localhost:5000/api/video-gallery', {
+  const response = await fetch('http://localhost:5021/api/video-gallery', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -450,14 +450,14 @@ const createVideo = async () => {
 
 // Get all videos
 const getVideos = async () => {
-  const response = await fetch('http://localhost:5000/api/video-gallery?category=Events&page=1');
+  const response = await fetch('http://localhost:5021/api/video-gallery?category=Events&page=1');
   const data = await response.json();
   console.log(data);
 };
 
 // Update a video
 const updateVideo = async (id) => {
-  const response = await fetch(`http://localhost:5000/api/video-gallery/${id}`, {
+  const response = await fetch(`http://localhost:5021/api/video-gallery/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json'
@@ -473,7 +473,7 @@ const updateVideo = async (id) => {
 
 // Delete a video
 const deleteVideo = async (id) => {
-  const response = await fetch(`http://localhost:5000/api/video-gallery/${id}`, {
+  const response = await fetch(`http://localhost:5021/api/video-gallery/${id}`, {
     method: 'DELETE'
   });
   

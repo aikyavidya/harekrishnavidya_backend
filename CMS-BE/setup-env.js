@@ -31,7 +31,7 @@ PAYU_SALT=your_live_payu_salt_key_here
 PAYU_MODE=live
 
 # Base URL (for callbacks - use production URL in production)
-BASE_URL=http://localhost:5000
+BASE_URL=http://localhost:5021
 
 # Frontend URL (for redirects after payment)
 FRONTEND_URL=http://localhost:3000

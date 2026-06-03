@@ -8,7 +8,7 @@ Successfully converted the Next.js photo gallery page from static data to dynami
 ### 1. **Next.js Frontend (page.tsx)**
 
 #### API Integration
-- Added API base URL configuration: `http://localhost:5000/api`
+- Added API base URL configuration: `http://localhost:5021/api`
 - Updated `Photo` interface to match backend schema:
   - `_id` instead of `id`
   - `imageUrl` instead of `url`
@@ -52,14 +52,14 @@ Successfully converted the Next.js photo gallery page from static data to dynami
 
 #### PhotoGalleryForm.jsx
 - Configured with API endpoints for image upload and data management:
-  - POST: `http://localhost:5000/api/photo-gallery` (Upload with image file)
-  - PUT: `http://localhost:5000/api/photo-gallery/:id` (Update)
-  - GET: `http://localhost:5000/api/photo-gallery/:id` (Fetch single)
+  - POST: `http://localhost:5021/api/photo-gallery` (Upload with image file)
+  - PUT: `http://localhost:5021/api/photo-gallery/:id` (Update)
+  - GET: `http://localhost:5021/api/photo-gallery/:id` (Fetch single)
 
 #### PhotoGalleryList.jsx
 - Configured with API endpoints:
-  - GET: `http://localhost:5000/api/photo-gallery` (List all with filters)
-  - DELETE: `http://localhost:5000/api/photo-gallery/:id` (Delete)
+  - GET: `http://localhost:5021/api/photo-gallery` (List all with filters)
+  - DELETE: `http://localhost:5021/api/photo-gallery/:id` (Delete)
 
 ## Features Implemented
 
@@ -85,7 +85,7 @@ Successfully converted the Next.js photo gallery page from static data to dynami
 ## API Endpoints Used
 
 ### Photo Gallery API
-- **Base URL**: `http://localhost:5000/api`
+- **Base URL**: `http://localhost:5021/api`
 - **Endpoints**:
   - `GET /photo-gallery` - Fetch all photos
   - `GET /photo-gallery/:id` - Fetch single photo
@@ -112,4 +112,4 @@ Successfully converted the Next.js photo gallery page from static data to dynami
 
 1. **Auto-refresh interval**: Set to 30 seconds.
 2. **Category mapping**: Backend uses proper case (e.g., "Education"), frontend logic uses lowercase.
-3. **Image URLs**: Photos are served from `http://localhost:5000${photo.imageUrl}`.
+3. **Image URLs**: Photos are served from `http://localhost:5021${photo.imageUrl}`.

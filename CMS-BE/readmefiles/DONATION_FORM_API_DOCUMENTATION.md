@@ -4,7 +4,7 @@ This document describes the APIs for handling donation form submissions and paym
 
 ## Base URL
 ```
-http://localhost:5000/api/donations
+http://localhost:5021/api/donations
 ```
 
 ## API Endpoints
@@ -215,7 +215,7 @@ Retrieves statistics broken down by seva type and donor type.
 ```javascript
 const submitDonationForm = async (formData) => {
   try {
-    const response = await fetch('http://localhost:5000/api/donations/submit-form', {
+    const response = await fetch('http://localhost:5021/api/donations/submit-form', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -268,7 +268,7 @@ const submitDonationForm = async (formData) => {
 ```javascript
 const verifyPayment = async (paymentResponse, donationId) => {
   try {
-    const response = await fetch('http://localhost:5000/api/donations/verify-payment-form', {
+    const response = await fetch('http://localhost:5021/api/donations/verify-payment-form', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -396,7 +396,7 @@ document.getElementById('donationForm').addEventListener('submit', async (e) => 
 
 ```bash
 # Submit donation form
-curl -X POST http://localhost:5000/api/donations/submit-form \
+curl -X POST http://localhost:5021/api/donations/submit-form \
   -H "Content-Type: application/json" \
   -d '{
     "sevaName": "Test Seva",
@@ -409,10 +409,10 @@ curl -X POST http://localhost:5000/api/donations/submit-form \
   }'
 
 # Get donation by order ID
-curl http://localhost:5000/api/donations/order/order_1234567890
+curl http://localhost:5021/api/donations/order/order_1234567890
 
 # Get seva statistics
-curl http://localhost:5000/api/donations/seva-stats
+curl http://localhost:5021/api/donations/seva-stats
 ```
 
 ## Database Schema

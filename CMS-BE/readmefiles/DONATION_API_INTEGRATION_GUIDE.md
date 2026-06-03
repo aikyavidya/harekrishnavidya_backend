@@ -6,7 +6,7 @@ Complete guide for integrating donation forms and payment processing in your fro
 
 ### Base URL
 ```
-http://localhost:5000/api/donations
+http://localhost:5021/api/donations
 ```
 
 ### Required Setup
@@ -219,7 +219,7 @@ Retrieves donation details using Razorpay order ID.
     <script>
         // Replace with your actual Razorpay key
         const RAZORPAY_KEY_ID = 'rzp_test_your_razorpay_key_id_here';
-        const API_BASE_URL = 'http://localhost:5000/api/donations';
+        const API_BASE_URL = 'http://localhost:5021/api/donations';
 
         document.getElementById('donationForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -356,7 +356,7 @@ const DonationForm = () => {
 
     try {
       // Submit form to backend
-      const response = await fetch('http://localhost:5000/api/donations/submit-form', {
+      const response = await fetch('http://localhost:5021/api/donations/submit-form', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -405,7 +405,7 @@ const DonationForm = () => {
 
   const verifyPayment = async (paymentResponse, donationId) => {
     try {
-      const response = await fetch('http://localhost:5000/api/donations/verify-payment-form', {
+      const response = await fetch('http://localhost:5021/api/donations/verify-payment-form', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -636,7 +636,7 @@ export default {
       this.loading = true;
       
       try {
-        const response = await fetch('http://localhost:5000/api/donations/submit-form', {
+        const response = await fetch('http://localhost:5021/api/donations/submit-form', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -684,7 +684,7 @@ export default {
     
     async verifyPayment(paymentResponse, donationId) {
       try {
-        const response = await fetch('http://localhost:5000/api/donations/verify-payment-form', {
+        const response = await fetch('http://localhost:5021/api/donations/verify-payment-form', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -748,7 +748,7 @@ export default {
 
 ```bash
 # Submit donation form
-curl -X POST http://localhost:5000/api/donations/submit-form \
+curl -X POST http://localhost:5021/api/donations/submit-form \
   -H "Content-Type: application/json" \
   -d '{
     "sevaName": "Test Seva",
@@ -761,10 +761,10 @@ curl -X POST http://localhost:5000/api/donations/submit-form \
   }'
 
 # Get donation by order ID
-curl http://localhost:5000/api/donations/order/order_1234567890
+curl http://localhost:5021/api/donations/order/order_1234567890
 
 # Get seva statistics
-curl http://localhost:5000/api/donations/seva-stats
+curl http://localhost:5021/api/donations/seva-stats
 ```
 
 ---
