@@ -2,6 +2,70 @@ const Razorpay = require('razorpay');
 const Donation = require('../models/Donation');
 const crypto = require('crypto');
 const { sendDonationReceipt, testEmailConfiguration } = require('../utils/emailService');
+const axios = require('axios'); // STEP 1: Import axios for making HTTP requests to the external Dhanunjaya API
+
+// --- START OF NEW FEATURE: Dhanunjaya API Sync Helper ---
+// This function sends donation data to the external Dhanunjaya database.
+const syncToDhanunjaya = async (donation) => {
+  try {
+    // 1. Initialize a default Seva code fallback
+    let mappedSevaCode = "GEN-DEFAULT";
+
+    // 2. Normalize the input sevaName to lowercase for safe checking
+    const sevaNameRaw = (donation.sevaName || "").toLowerCase();
+
+    // 3. Map the UI Seva names to Dhanunjaya's exact required codes
+    if (sevaNameRaw.includes("annadan")) {
+      mappedSevaCode = "HIB-GD-FOOD-ANNADANAM"; // Set code for Annadanam
+    } else if (sevaNameRaw.includes("vidhya") || sevaNameRaw.includes("vidya")) {
+      mappedSevaCode = "HIB-GD-EDUC-VIDYADAN"; // Set code for Vidyadanam
+    } else if (sevaNameRaw.includes("child") || sevaNameRaw.includes("sponsor")) {
+      mappedSevaCode = "HIB-GD-EDUC-CHISPONSR"; // Set code for Child Sponsor
+    }
+
+    // 4. Determine if 80G tax exemption is required based on DB schema fields (fallback to false)
+    const isAtgRequired = donation.is80gRequired === true || donation.requires80G === true || false;
+
+    // 5. Build the exact JSON payload expected by the Dhanunjaya API
+    const dhanunjayaPayload = {
+      donor_name: donation.donorName || "Anonymous Donor", // Use donor name or default
+      pan_no: donation.panNumber || "N/A",                 // Pass PAN if it exists, else N/A
+      mobile: donation.donorPhone || "N/A",                // Pass phone if it exists, else N/A
+      email: donation.donorEmail || "N/A",                 // Pass email if it exists, else N/A
+      address: donation.address || "N/A",                  // Pass address if it exists, else N/A
+      amount: donation.amount,                             // Pass exact donation amount
+      seva: mappedSevaCode,                                // Pass the strictly mapped Seva code
+      remarks: donation.razorpayPaymentId || donation.razorpayOrderId || "N/A", // Pass transaction ID as remarks
+      atg_required: isAtgRequired,                         // Pass boolean for 80G tax receipt
+      trust: "DEFAULT_TRUST_VALUE",                        // Placeholder: HR to provide later
+      preacher: "DEFAULT_PREACHER_VALUE",                  // Placeholder: HR to provide later
+      separated_address: {                                 // Required structured address object
+        type: "Residential",                               // Default type
+        address_line_1: donation.addressLine1 || "",       // Pass line 1 if exists
+        address_line_2: donation.addressLine2 || "",       // Pass line 2 if exists
+        city: donation.city || "N/A",                      // Pass city if exists
+        state: donation.state || "N/A",                    // Pass state if exists
+        country: "India",                                  // Default country
+        pin_code: donation.pincode || "N/A"                // Pass pincode if exists
+      }
+    };
+
+    // 6. Execute the POST request to the Dhanunjaya backend
+    // Note: This runs asynchronously in the background.
+    const response = await axios.post(
+      'https://dhan.harekrishnavidya.org/api/donate', // Target API Endpoint
+      dhanunjayaPayload                               // Data payload
+    );
+
+    // 7. Log success for server monitoring
+    console.log("Successfully synced to Dhanunjaya DB:", response.data?.message);
+
+  } catch (error) {
+    // 8. Catch and log errors safely so the main user thread NEVER crashes
+    console.error("Dhanunjaya Sync Failed. Error:", error.response?.data || error.message);
+  }
+};
+// --- END OF NEW FEATURE: Dhanunjaya API Sync Helper ---
 
 // Initialize Razorpay lazily
 let razorpay = null;
@@ -128,6 +192,14 @@ const verifyDonationPayment = async (req, res) => {
     });
 
     await donation.save();
+
+    // --- NEW LOGIC: Trigger background sync to Dhanunjaya ---
+    // Check if the payment status is successfully completed
+    if (donation.paymentStatus === 'completed') {
+      // Call the sync helper WITHOUT the 'await' keyword for non-blocking execution
+      syncToDhanunjaya(donation);
+    }
+    // --- END NEW LOGIC ---
 
     // Export donation form submission to CSV (if form data is available)
     try {
@@ -826,8 +898,8 @@ const submitDonationForm = async (req, res) => {
     // Validate required fields
     // For campaign donations, donor info can be empty (will be collected by Razorpay)
     const isCampaignDonation = campaign && (
-      campaign === 'support-compaign' || 
-      campaign === 'support-campaign' || 
+      campaign === 'support-compaign' ||
+      campaign === 'support-campaign' ||
       campaign.toLowerCase().includes('campaign') ||
       /^[0-9a-fA-F]{24}$/.test(campaign)
     );
@@ -1179,6 +1251,14 @@ const verifyPayment = async (req, res) => {
     };
 
     await donation.save();
+
+    // --- NEW LOGIC: Trigger background sync to Dhanunjaya ---
+    // Check if the payment status is successfully completed
+    if (donation.paymentStatus === 'completed') {
+      // Call the sync helper WITHOUT the 'await' keyword for non-blocking execution
+      syncToDhanunjaya(donation);
+    }
+    // --- END NEW LOGIC ---
 
     // Send receipt email if payment is completed and donor email exists
     let emailResult = null;
@@ -1780,6 +1860,14 @@ const payuSuccess = async (req, res) => {
 
     await donation.save();
     console.log('Donation saved/updated:', donation._id);
+
+    // --- NEW LOGIC: Trigger background sync to Dhanunjaya ---
+    // Check if the payment status is successfully completed
+    if (donation.paymentStatus === 'completed') {
+      // Call the sync helper WITHOUT the 'await' keyword for non-blocking execution
+      syncToDhanunjaya(donation);
+    }
+    // --- END NEW LOGIC ---
 
     // Get frontend URL for redirect - pass donationId so frontend can verify payment
     // Ensure HTTPS in production
