@@ -37,8 +37,8 @@ const syncToDhanunjaya = async (donation) => {
       seva: mappedSevaCode,                                // Pass the strictly mapped Seva code
       remarks: donation.razorpayPaymentId || donation.razorpayOrderId || "N/A", // Pass transaction ID as remarks
       atg_required: isAtgRequired,                         // Pass boolean for 80G tax receipt
-      trust: "DEFAULT_TRUST_VALUE",                        // Placeholder: HR to provide later
-      preacher: "DEFAULT_PREACHER_VALUE",                  // Placeholder: HR to provide later
+      trust: "None",                                        // Placeholder: HR to provide later
+      preacher: "None",                                    // Placeholder: HR to provide later
       separated_address: {                                 // Required structured address object
         type: "Residential",                               // Default type
         address_line_1: donation.addressLine1 || "",       // Pass line 1 if exists
