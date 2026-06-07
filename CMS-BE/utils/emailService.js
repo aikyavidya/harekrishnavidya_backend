@@ -3,25 +3,33 @@ const path = require('path');
 const fs = require('fs');
 const { generateDonationReceiptPDF, generateReceiptNumber } = require('./pdfReceiptGenerator');
 
-// Email configuration
-const emailConfig = {
-  host: 'smtp.hostinger.com',
-  port: 587,
-  secure: false, // true for 465, false for other ports
-  auth: {
-    user: 'noreply_donations@harekrishnavidya.org',
-    pass: 'RadhaKrishna#108'
-  },
-  tls: {
-    ciphers: 'SSLv3'
-  },
-  debug: false,
-  logger: false
-};
-
-// Create transporter
+// Email configuration — reads from environment variables.
+// Set EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS in your .env file.
+// Compatible with Brevo (smtp-relay.brevo.com:587), Hostinger, or any SMTP relay.
 const createTransporter = () => {
-  return nodemailer.createTransport(emailConfig);
+  const host = process.env.EMAIL_HOST || 'smtp.hostinger.com';
+  const port = parseInt(process.env.EMAIL_PORT || '587', 10);
+  const user = process.env.EMAIL_USER || 'noreply_donations@harekrishnavidya.org';
+  const pass = process.env.EMAIL_PASS;
+
+  if (!pass) {
+    console.warn('[emailService] WARNING: EMAIL_PASS is not set in environment variables. Email sending will likely fail.');
+  }
+
+  return nodemailer.createTransport({
+    host: host,
+    port: port,
+    secure: port === 465, // true only for port 465 (SSL), false for 587 (STARTTLS)
+    auth: {
+      user: user,
+      pass: pass || ''
+    },
+    tls: {
+      rejectUnauthorized: true // Enforce valid TLS certificate in production
+    },
+    debug: process.env.NODE_ENV !== 'production',
+    logger: process.env.NODE_ENV !== 'production'
+  });
 };
 
 // Function to get logo as base64 for inline embedding (CID attachment)

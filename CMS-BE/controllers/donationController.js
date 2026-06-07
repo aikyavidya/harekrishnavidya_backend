@@ -32,21 +32,22 @@ const syncToDhanunjaya = async (donation) => {
       pan_no: donation.panNumber || "N/A",                 // Pass PAN if it exists, else N/A
       mobile: donation.donorPhone || "N/A",                // Pass phone if it exists, else N/A
       email: donation.donorEmail || "N/A",                 // Pass email if it exists, else N/A
-      address: donation.address || "N/A",                  // Pass address if it exists, else N/A
+      // Build full combined address string from all address fields
+      address: [donation.houseApartment, donation.address, donation.village, donation.district, donation.state, donation.pinCode].filter(Boolean).join(', ') || "N/A",
       amount: donation.amount,                             // Pass exact donation amount
       seva: mappedSevaCode,                                // Pass the strictly mapped Seva code
       remarks: donation.razorpayPaymentId || donation.razorpayOrderId || "N/A", // Pass transaction ID as remarks
       atg_required: isAtgRequired,                         // Pass boolean for 80G tax receipt
       trust: "HKM India - Sadasivpet",                      // Validated Frappe trust value
       preacher: "HKWEB",                                   // Validated Frappe preacher value
-      separated_address: {                                 // Required structured address object
-        type: "Residential",                               // Default type
-        address_line_1: donation.addressLine1 || "",       // Pass line 1 if exists
-        address_line_2: donation.addressLine2 || "",       // Pass line 2 if exists
-        city: donation.city || "N/A",                      // Pass city if exists
-        state: donation.state || "N/A",                    // Pass state if exists
-        country: "India",                                  // Default country
-        pin_code: donation.pincode || "N/A"                // Pass pincode if exists
+      separated_address: {                                      // Required structured address object
+        type: "Residential",                                    // Default type
+        address_line_1: donation.houseApartment || "",          // Address Line 1 (House/Apt)
+        address_line_2: donation.address || "",                 // Address Line 2 (Street/Area)
+        city: donation.village || "N/A",                        // City/Village field
+        state: donation.state || "N/A",                         // State dropdown value
+        country: "India",                                       // Default country
+        pin_code: donation.pinCode || "N/A"                     // 6-digit PIN code (correct case)
       }
     };
 
@@ -937,6 +938,29 @@ const submitDonationForm = async (req, res) => {
       });
     }
 
+    // Validate address fields when Maha Prasadam or 80G is requested
+    // Mirrors frontend validation rules exactly for defence-in-depth
+    if (wantsMahaPrasadam || wants80G) {
+      if (!houseApartment || houseApartment.trim().length < 5) {
+        return res.status(400).json({ success: false, message: 'Address Line 1 must be at least 5 characters' });
+      }
+      if (!address || address.trim().length < 5) {
+        return res.status(400).json({ success: false, message: 'Address Line 2 must be at least 5 characters' });
+      }
+      if (!village || village.trim().length < 2) {
+        return res.status(400).json({ success: false, message: 'City/Village is required (min 2 characters)' });
+      }
+      if (!district || district.trim().length < 2) {
+        return res.status(400).json({ success: false, message: 'District is required (min 2 characters)' });
+      }
+      if (!state || !state.trim()) {
+        return res.status(400).json({ success: false, message: 'Please select a State / UT' });
+      }
+      if (!pinCode || !/^\d{6}$/.test(pinCode)) {
+        return res.status(400).json({ success: false, message: 'PIN code must be exactly 6 digits' });
+      }
+    }
+
     // Validate amount (robust parsing; allows ₹1, ₹2, etc.)
     const parsedSevaAmount = Number(sevaAmount);
     if (!Number.isFinite(parsedSevaAmount) || parsedSevaAmount <= 0) {
@@ -1736,9 +1760,21 @@ const payuSuccess = async (req, res) => {
       hash
     } = params;
 
-    // Validate required fields
-    if (!txnid || !status || !hash) {
-      console.error('PayU Success: Missing required fields', { txnid, status, hash: !!hash });
+    // --- HARDENED VALIDATION ---
+    // Guard ALL six fields that participate in the PayU hash string.
+    // A request missing any of them must be rejected before the hash is computed;
+    // otherwise an undefined field would be interpolated as the literal string
+    // "undefined", which could produce an unpredictable hash comparison.
+    const missingFields = [];
+    if (!txnid)       missingFields.push('txnid');
+    if (!status)      missingFields.push('status');
+    if (!hash)        missingFields.push('hash');
+    if (!amount)      missingFields.push('amount');
+    if (!productinfo) missingFields.push('productinfo');
+    if (!email)       missingFields.push('email');
+
+    if (missingFields.length > 0) {
+      console.error('PayU Success: Missing required fields:', missingFields);
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       const redirectUrl = `${frontendUrl}/donate?payment=error&reason=missing_data`;
       return res.status(400).send(`
@@ -1765,12 +1801,40 @@ const payuSuccess = async (req, res) => {
       `);
     }
 
-    // Verify hash
-    const hashString = `${process.env.PAYU_SALT}|${status}|||||||||||${email}|${firstname}|${productinfo}|${amount}|${txnid}|${process.env.PAYU_KEY}`;
+    // --- HASH VERIFICATION ---
+    // PayU reverse hash format (for response):
+    //   SALT|status|||||||||||email|firstname|productinfo|amount|txnid|KEY
+    // All interpolated values use empty-string fallbacks to prevent the literal
+    // string "undefined" from corrupting the hash if a field is unexpectedly absent.
+    const hashString = [
+      process.env.PAYU_SALT || '',
+      status        || '',
+      '',           // udf10 (empty)
+      '',           // udf9
+      '',           // udf8
+      '',           // udf7
+      '',           // udf6
+      '',           // udf5
+      '',           // udf4
+      '',           // udf3
+      '',           // udf2
+      '',           // udf1
+      email         || '',
+      firstname     || '',
+      productinfo   || '',
+      amount        || '',
+      txnid         || '',
+      process.env.PAYU_KEY || ''
+    ].join('|');
+
     const calculatedHash = crypto.createHash('sha512').update(hashString).digest('hex');
 
     if (calculatedHash !== hash) {
-      console.error('PayU hash verification failed');
+      console.error('PayU hash verification failed. Possible tampering or credential mismatch.', {
+        txnid,
+        status,
+        receivedHash: hash ? hash.substring(0, 12) + '...' : 'none' // Log only prefix for security
+      });
       let frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       if (process.env.NODE_ENV === 'production' && frontendUrl.startsWith('http://')) {
         frontendUrl = frontendUrl.replace('http://', 'https://');
@@ -1781,6 +1845,40 @@ const payuSuccess = async (req, res) => {
         <html>
           <head>
             <title>Payment Verification Failed - Redirecting...</title>
+            <script>
+              window.location.replace('${redirectUrl}');
+            </script>
+            <noscript>
+              <meta http-equiv="refresh" content="0;url=${redirectUrl}">
+            </noscript>
+          </head>
+          <body>
+            <p style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+              Redirecting...
+              <br><br>
+              <a href="${redirectUrl}">Click here if you are not redirected</a>
+            </p>
+          </body>
+        </html>
+      `);
+    }
+
+    // --- SECONDARY STATUS CHECK ---
+    // Hash is valid but we must also confirm PayU reported the payment as 'success'.
+    // A failed/pending payment can have a valid hash — without this check, it would
+    // be saved as 'completed' in the database, which is a critical logical error.
+    if (status !== 'success') {
+      console.warn('PayU callback: hash verified but payment status is not success.', { txnid, status, mihpayid });
+      let frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      if (process.env.NODE_ENV === 'production' && frontendUrl.startsWith('http://')) {
+        frontendUrl = frontendUrl.replace('http://', 'https://');
+      }
+      const redirectUrl = `${frontendUrl}/donate?payment=failed&txnid=${txnid || ''}`;
+      return res.status(200).send(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Payment Not Successful - Redirecting...</title>
             <script>
               window.location.replace('${redirectUrl}');
             </script>
