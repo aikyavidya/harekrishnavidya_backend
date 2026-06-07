@@ -39,15 +39,15 @@ const syncToDhanunjaya = async (donation) => {
       remarks: donation.razorpayPaymentId || donation.razorpayOrderId || "N/A", // Pass transaction ID as remarks
       atg_required: isAtgRequired,                         // Pass boolean for 80G tax receipt
       trust: "HKM India - Sadasivpet",                      // Validated Frappe trust value
-      preacher: "HKWEB",                                   // Validated Frappe preacher value
-      separated_address: {                                      // Required structured address object
-        type: "Residential",                                    // Default type
-        address_line_1: donation.houseApartment || "",          // Address Line 1 (House/Apt)
-        address_line_2: donation.address || "",                 // Address Line 2 (Street/Area)
-        city: donation.village || "N/A",                        // City/Village field
-        state: donation.state || "N/A",                         // State dropdown value
-        country: "India",                                       // Default country
-        pin_code: donation.pinCode || "N/A"                     // 6-digit PIN code (correct case)
+      preacher: "WEB",                                   // Validated Frappe preacher value
+      separated_address: {                                 // Required structured address object
+        type: "Residential",                               // Default type
+        address_line_1: donation.addressLine1 || "",       // Pass line 1 if exists
+        address_line_2: donation.addressLine2 || "",       // Pass line 2 if exists
+        city: donation.city || "N/A",                      // Pass city if exists
+        state: donation.state || "N/A",                    // Pass state if exists
+        country: "India",                                  // Default country
+        pin_code: donation.pincode || "N/A"                // Pass pincode if exists
       }
     };
 
