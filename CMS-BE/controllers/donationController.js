@@ -42,12 +42,12 @@ const syncToDhanunjaya = async (donation) => {
       preacher: "WEB",                                   // Validated Frappe preacher value
       separated_address: {                                 // Required structured address object
         type: "Residential",                               // Default type
-        address_line_1: donation.addressLine1 || "",       // Pass line 1 if exists
-        address_line_2: donation.addressLine2 || "",       // Pass line 2 if exists
-        city: donation.city || "N/A",                      // Pass city if exists
-        state: donation.state || "N/A",                    // Pass state if exists
+        address_line_1: donation.houseApartment || "",     // Address Line 1 (House/Apt)
+        address_line_2: donation.address || "",            // Address Line 2 (Street/Area)
+        city: donation.village || "N/A",                   // City/Village field
+        state: donation.state || "N/A",                    // State dropdown value
         country: "India",                                  // Default country
-        pin_code: donation.pincode || "N/A"                // Pass pincode if exists
+        pin_code: donation.pinCode || "N/A"                // 6-digit PIN code
       }
     };
 
