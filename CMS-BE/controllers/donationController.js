@@ -4,69 +4,101 @@ const crypto = require('crypto');
 const { sendDonationReceipt, testEmailConfiguration } = require('../utils/emailService');
 const axios = require('axios'); // STEP 1: Import axios for making HTTP requests to the external Dhanunjaya API
 
-// --- START OF NEW FEATURE: Dhanunjaya API Sync Helper ---
-// This function sends donation data to the external Dhanunjaya database.
-const syncToDhanunjaya = async (donation) => {
-  try {
-    // 1. Initialize a default Seva code fallback
-    let mappedSevaCode = "GEN-DEFAULT";
-
-    // 2. Normalize the input sevaName to lowercase for safe checking
-    const sevaNameRaw = (donation.sevaName || "").toLowerCase();
-
-    // 3. Map the UI Seva names to Dhanunjaya's exact required codes
-    if (sevaNameRaw.includes("annadan")) {
-      mappedSevaCode = "HIB-GD-FOOD-ANNADANAM"; // Set code for Annadanam
-    } else if (sevaNameRaw.includes("vidhya") || sevaNameRaw.includes("vidya")) {
-      mappedSevaCode = "HIB-GD-EDUC-VIDYADAN"; // Set code for Vidyadanam
-    } else if (sevaNameRaw.includes("child") || sevaNameRaw.includes("sponsor")) {
-      mappedSevaCode = "HIB-GD-EDUC-CHISPONSR"; // Set code for Child Sponsor
-    }
-
-    // 4. Determine if 80G tax exemption is required based on DB schema fields (fallback to false)
-    const isAtgRequired = donation.is80gRequired === true || donation.requires80G === true || false;
-
-    // 5. Build the exact JSON payload expected by the Dhanunjaya API
-    const dhanunjayaPayload = {
-      donor_name: donation.donorName || "Anonymous Donor", // Use donor name or default
-      pan_no: donation.panNumber || "N/A",                 // Pass PAN if it exists, else N/A
-      mobile: donation.donorPhone || "N/A",                // Pass phone if it exists, else N/A
-      email: donation.donorEmail || "N/A",                 // Pass email if it exists, else N/A
-      // Build full combined address string from all address fields
-      address: [donation.houseApartment, donation.address, donation.village, donation.district, donation.state, donation.pinCode].filter(Boolean).join(', ') || "N/A",
-      amount: donation.amount,                             // Pass exact donation amount
-      seva: mappedSevaCode,                                // Pass the strictly mapped Seva code
-      remarks: donation.razorpayPaymentId || donation.razorpayOrderId || "N/A", // Pass transaction ID as remarks
-      atg_required: isAtgRequired,                         // Pass boolean for 80G tax receipt
-      trust: "HKM India - Sadasivpet",                      // Validated Frappe trust value
-      preacher: "WEB",                                   // Validated Frappe preacher value
-      separated_address: {                                 // Required structured address object
-        type: "Residential",                               // Default type
-        address_line_1: donation.houseApartment || "",     // Address Line 1 (House/Apt)
-        address_line_2: donation.address || "",            // Address Line 2 (Street/Area)
-        city: donation.village || "N/A",                   // City/Village field
-        state: donation.state || "N/A",                    // State dropdown value
-        country: "India",                                  // Default country
-        pin_code: donation.pinCode || "N/A"                // 6-digit PIN code
-      }
-    };
-
-    // 6. Execute the POST request to the Dhanunjaya backend
-    // Note: This runs asynchronously in the background.
-    const response = await axios.post(
-      'https://dhan.harekrishnavidya.org/api/donate', // Target API Endpoint
-      dhanunjayaPayload                               // Data payload
-    );
-
-    // 7. Log success for server monitoring
-    console.log("Successfully synced to Dhanunjaya DB:", response.data?.message);
-
-  } catch (error) {
-    // 8. Catch and log errors safely so the main user thread NEVER crashes
-    console.error("Dhanunjaya Sync Failed. Error:", error.response?.data || error.message);
+// ── syncToDhanunjaya — with 3-attempt retry and failure flag ──────────
+const syncToDhanunjaya = async (donation, retries = 3) => {
+  // Skip if already successfully synced
+  if (donation.dhanunjayaSynced === true) {
+    console.log(`[Dhanunjaya] Donation ${donation._id} already synced — skipping`);
+    return;
   }
+
+  // Map sevaName to Dhanunjaya seva codes
+  let mappedSevaCode = "GEN-DEFAULT";
+  const sevaNameRaw = (donation.sevaName || "").toLowerCase();
+  if (sevaNameRaw.includes("annadan")) {
+    mappedSevaCode = "HIB-GD-FOOD-ANNADANAM";
+  } else if (sevaNameRaw.includes("vidhya") || sevaNameRaw.includes("vidya")) {
+    mappedSevaCode = "HIB-GD-EDUC-VIDYADAN";
+  } else if (sevaNameRaw.includes("child") || sevaNameRaw.includes("sponsor")) {
+    mappedSevaCode = "HIB-GD-EDUC-CHISPONSR";
+  }
+
+  const isAtgRequired =
+    donation.is80gRequired === true || donation.requires80G === true || false;
+
+  const dhanunjayaPayload = {
+    donor_name: donation.donorName || "Anonymous Donor",
+    pan_no:     donation.panNumber || "N/A",
+    mobile:     donation.donorPhone || "N/A",
+    email:      donation.donorEmail || "N/A",
+    address:    [
+                  donation.houseApartment, donation.address, donation.village,
+                  donation.district, donation.state, donation.pinCode
+                ].filter(Boolean).join(', ') || "N/A",
+    amount:       donation.amount,
+    seva:         mappedSevaCode,
+    remarks:      donation.razorpayPaymentId || donation.razorpayOrderId || "N/A",
+    atg_required: isAtgRequired,
+    trust:        "HKM India - Sadasivpet",
+    preacher:     "WEB",
+    separated_address: {
+      type:           "Residential",
+      address_line_1: donation.houseApartment || "",
+      address_line_2: donation.address || "",
+      city:           donation.village || "N/A",
+      state:          donation.state || "N/A",
+      country:        "India",
+      pin_code:       donation.pinCode || "N/A"
+    }
+  };
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const fetch = require('node-fetch');
+      const response = await fetch('https://dhan.harekrishnavidya.org/api/donate', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(dhanunjayaPayload),
+        timeout: 10000  // 10 second timeout per attempt
+      });
+
+      if (!response.ok) {
+        throw new Error(`Dhanunjaya returned HTTP ${response.status}`);
+      }
+
+      const responseData = await response.json().catch(() => ({}));
+      console.log(`[Dhanunjaya] Synced donation ${donation._id} on attempt ${attempt}:`, responseData?.message || 'ok');
+
+      // Mark success on the DB record
+      await Donation.findByIdAndUpdate(donation._id, {
+        dhanunjayaSynced:     true,
+        dhanunjayaSyncFailed: false
+      });
+      return; // success — stop here
+
+    } catch (error) {
+      console.error(
+        `[Dhanunjaya] Attempt ${attempt}/${retries} failed for donation ${donation._id}:`,
+        error.message
+      );
+      if (attempt < retries) {
+        // Exponential backoff: wait 2s after attempt 1, 4s after attempt 2
+        const waitMs = 1000 * Math.pow(2, attempt);
+        console.log(`[Dhanunjaya] Waiting ${waitMs}ms before retry...`);
+        await new Promise(r => setTimeout(r, waitMs));
+      }
+    }
+  }
+
+  // All retries exhausted — flag in DB so admin dashboard can show it
+  console.error(
+    `[Dhanunjaya] All ${retries} attempts failed for donation ${donation._id} — flagging dhanunjayaSyncFailed`
+  );
+  await Donation.findByIdAndUpdate(donation._id, {
+    dhanunjayaSynced:     false,
+    dhanunjayaSyncFailed: true
+  });
 };
-// --- END OF NEW FEATURE: Dhanunjaya API Sync Helper ---
 
 // Initialize Razorpay lazily
 let razorpay = null;
@@ -448,10 +480,34 @@ const getDonationStats = async (req, res) => {
       completedAmount: 0
     };
 
+    // Count unique donors who completed a donation in last 30 days
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const activeDonorEmails = await Donation.distinct('donorEmail', {
+      paymentStatus: 'completed',
+      createdAt: { $gte: thirtyDaysAgo },
+      donorEmail: { $exists: true, $ne: null, $ne: '' }
+    });
+    const activeDonors = activeDonorEmails.length;
+
+    // Payment method breakdown across ALL completed donations
+    const paymentMethodStats = await Donation.aggregate([
+      { $match: { ...filter, paymentStatus: 'completed' } },
+      {
+        $group: {
+          _id: '$paymentMethod',
+          count: { $sum: 1 },
+          total: { $sum: '$amount' }
+        }
+      },
+      { $sort: { count: -1 } }
+    ]);
+
     res.json({
       success: true,
       stats: {
         ...result,
+        activeDonors,
+        paymentMethods: paymentMethodStats,
         statusBreakdown: statusStats,
         monthlyBreakdown: monthlyStats
       }
@@ -603,18 +659,36 @@ const forceSyncAllPayments = async (req, res) => {
 
         if (existingDonation) {
           // Update existing donation with latest data
-          await Donation.findOneAndUpdate(
-            { razorpayPaymentId: payment.id },
-            donationData,
-            { new: true }
-          );
-          updatedCount++;
+// Safety guard — never overwrite a completed record's form data with Razorpay's thin data
+if (existingDonation.paymentStatus === 'completed') {
+  // Only retry Dhanunjaya sync if it previously failed
+  if (existingDonation.dhanunjayaSyncFailed) {
+    syncToDhanunjaya(existingDonation);
+  }
+  skippedCount++;
+  continue;
+}
+
+const updatedDonation = await Donation.findOneAndUpdate(
+  { razorpayPaymentId: payment.id },
+  donationData,
+  { new: true }
+);
+updatedCount++;
+// NEW: forward to Dhanunjaya if now completed
+if (updatedDonation && updatedDonation.paymentStatus === 'completed') {
+  syncToDhanunjaya(updatedDonation);
+}
           console.log(`Updated existing payment: ${payment.id}`);
         } else {
           // Create new donation
           const donation = new Donation(donationData);
           await donation.save();
-          syncedCount++;
+syncedCount++;
+// NEW: forward recovered payment to Dhanunjaya
+if (donation.paymentStatus === 'completed') {
+  syncToDhanunjaya(donation);
+}
           console.log(`Created new payment: ${payment.id}`);
         }
       } catch (paymentError) {
@@ -659,9 +733,18 @@ const syncDonationsFromRazorpay = async (req, res) => {
     // Get Razorpay instance
     const razorpayInstance = getRazorpayInstance();
 
+    // Default to last 7 days if no date range provided
+    const defaultFrom = Math.floor((Date.now() - 7 * 24 * 60 * 60 * 1000) / 1000);
+    const from = req.query.startDate
+      ? Math.floor(new Date(req.query.startDate).getTime() / 1000)
+      : defaultFrom;
+    const to = req.query.endDate
+      ? Math.floor(new Date(req.query.endDate).getTime() / 1000)
+      : Math.floor(Date.now() / 1000);
+
     const options = {
-      from: startDate ? new Date(startDate).getTime() / 1000 : undefined,
-      to: endDate ? new Date(endDate).getTime() / 1000 : undefined,
+      from: from,
+      to: to,
       count: 100,  // Razorpay limit is 100 per request
       expand: ['card', 'emi', 'offer']  // Get more details about payments
     };
@@ -772,6 +855,10 @@ const syncDonationsFromRazorpay = async (req, res) => {
           await donation.save();
           newDonations.push(donation);
           syncedCount++;
+// NEW: forward recovered payment to Dhanunjaya
+if (donation.paymentStatus === 'completed') {
+  syncToDhanunjaya(donation); // fire-and-forget with internal retry
+}
           console.log(`Synced payment: ${payment.id} - ${payment.amount / 100} ${payment.currency}`);
         }
       } catch (paymentError) {
@@ -2316,6 +2403,294 @@ const downloadDonationFormData = async (req, res) => {
 };
 
 
+// ── handleRazorpayWebhook — server-to-server event from Razorpay ──────
+const handleRazorpayWebhook = async (req, res) => {
+  try {
+    const crypto = require('crypto');
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+
+    // Guard: reject if secret is not configured
+    if (!webhookSecret || webhookSecret === 'your_webhook_secret_here') {
+      console.error('[Webhook] RAZORPAY_WEBHOOK_SECRET is not configured in .env');
+      return res.status(500).json({ error: 'Webhook secret not configured on server' });
+    }
+
+    // Verify HMAC signature — Razorpay sends X-Razorpay-Signature header
+    // req.body is a raw Buffer here because of express.raw() middleware in server.js
+    const receivedSignature = req.headers['x-razorpay-signature'];
+    if (!receivedSignature) {
+      console.warn('[Webhook] Request missing X-Razorpay-Signature header — rejected');
+      return res.status(400).json({ error: 'Missing signature header' });
+    }
+
+    const expectedSignature = crypto
+      .createHmac('sha256', webhookSecret)
+      .update(req.body) // raw Buffer — do NOT use JSON.stringify here
+      .digest('hex');
+
+    if (receivedSignature !== expectedSignature) {
+      console.warn('[Webhook] Signature mismatch — rejected (possible spoofed request)');
+      return res.status(400).json({ error: 'Invalid signature' });
+    }
+
+    // Safe to parse now that signature is verified
+    const payload = JSON.parse(req.body.toString());
+    const event   = payload.event;
+    console.log(`[Webhook] Received verified event: ${event}`);
+
+    // Only handle payment.captured — acknowledge everything else and ignore
+    if (event !== 'payment.captured') {
+      return res.status(200).json({ received: true, action: 'ignored', event });
+    }
+
+    const paymentEntity = payload.payload?.payment?.entity;
+    if (!paymentEntity) {
+      console.error('[Webhook] Malformed payload — no payment entity found');
+      return res.status(400).json({ error: 'Malformed payload' });
+    }
+
+    const razorpayPaymentId = paymentEntity.id;
+    const razorpayOrderId   = paymentEntity.order_id;
+
+    console.log(`[Webhook] Processing payment.captured: paymentId=${razorpayPaymentId} orderId=${razorpayOrderId}`);
+
+    // Find matching donation — order ID is most reliable match
+    let donation = null;
+    if (razorpayOrderId) {
+      donation = await Donation.findOne({ razorpayOrderId });
+    }
+    if (!donation && razorpayPaymentId) {
+      donation = await Donation.findOne({ razorpayPaymentId });
+    }
+
+    if (!donation) {
+      // Payment exists in Razorpay but zero record in our DB
+      // This happens when even submit-form failed — create a minimal recovery record
+      console.warn(`[Webhook] No donation record found for orderId=${razorpayOrderId} — creating minimal recovery record`);
+      donation = await Donation.create({
+        razorpayPaymentId,
+        razorpayOrderId,
+        donorName:     paymentEntity.email || paymentEntity.contact || 'Anonymous (webhook recovery)',
+        donorEmail:    paymentEntity.email    || 'unknown@webhook.recovery',
+        donorPhone:    paymentEntity.contact  || 'N/A',
+        amount:        paymentEntity.amount / 100,
+        currency:      paymentEntity.currency || 'INR',
+        paymentStatus: 'completed',
+        paymentMethod: paymentEntity.method,
+        metadata: {
+          paymentMethod: paymentEntity.method,
+          vpa:           paymentEntity.vpa     || null,
+          email:         paymentEntity.email   || null,
+          contact:       paymentEntity.contact || null,
+          status:        paymentEntity.status
+        }
+      });
+      console.log(`[Webhook] Created recovery record: ${donation._id}`);
+
+    } else if (donation.paymentStatus === 'completed') {
+      // Already completed (browser beat the webhook — normal case)
+      // Just check if Dhanunjaya sync failed previously and retry if so
+      console.log(`[Webhook] Donation ${donation._id} already completed`);
+      if (donation.dhanunjayaSyncFailed) {
+        console.log(`[Webhook] dhanunjayaSyncFailed=true — retrying sync for ${donation._id}`);
+        syncToDhanunjaya(donation); // fire-and-forget with internal retry
+      }
+      return res.status(200).json({ received: true, action: 'already_completed', donationId: donation._id });
+
+    } else {
+      // Found pending record — mark it completed (browser-close scenario fixed)
+      await Donation.findByIdAndUpdate(donation._id, {
+        paymentStatus:     'completed',
+        razorpayPaymentId: razorpayPaymentId || donation.razorpayPaymentId,
+        updatedAt:         new Date()
+      });
+      donation = await Donation.findById(donation._id);
+      console.log(`[Webhook] Updated donation ${donation._id} from pending → completed`);
+    }
+
+    // Sync to Dhanunjaya — fire-and-forget (webhook must respond to Razorpay quickly)
+    // Internal retry logic handles failures
+    syncToDhanunjaya(donation);
+
+    return res.status(200).json({ received: true, action: 'processed', donationId: donation._id });
+
+  } catch (error) {
+    console.error('[Webhook] Unhandled error:', error.message, error.stack);
+    // Always return 200 to Razorpay even on error
+    // Returning 5xx causes Razorpay to retry the webhook repeatedly
+    return res.status(200).json({ received: true, error: 'Internal processing error' });
+  }
+};
+
+// ── startRazorpayCronJob — runs every 30 minutes ──────────────────────
+const startRazorpayCronJob = () => {
+  const cron = require('node-cron');
+
+  // Cron expression: every 30 minutes
+  cron.schedule('*/30 * * * *', async () => {
+    console.log('[Cron] ─── Starting Razorpay reconciliation ───');
+
+    try {
+      const RazorpaySDK = require('razorpay');
+      const instance = new RazorpaySDK({
+        key_id:     process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET
+      });
+
+      // Look back 48 hours — catches any missed payments from the last 2 days
+      const from = Math.floor((Date.now() - 48 * 60 * 60 * 1000) / 1000);
+      const to   = Math.floor(Date.now() / 1000);
+
+      let skip          = 0;
+      const limit       = 100;
+      let recovered     = 0;
+      let alreadyOk     = 0;
+      let syncRetried   = 0;
+
+      // ── Part 1: Razorpay payment reconciliation ──
+      while (true) {
+        let result;
+        try {
+          result = await instance.payments.all({ from, to, count: limit, skip });
+        } catch (apiErr) {
+          console.error('[Cron] Razorpay API call failed:', apiErr.message);
+          break;
+        }
+
+        const payments = result.items || [];
+        if (payments.length === 0) break;
+
+        for (const payment of payments) {
+          // Only care about captured (successful) payments
+          if (payment.status !== 'captured') continue;
+
+          // Find matching donation record
+          let donation = null;
+          if (payment.order_id) {
+            donation = await Donation.findOne({ razorpayOrderId: payment.order_id });
+          }
+          if (!donation && payment.id) {
+            donation = await Donation.findOne({ razorpayPaymentId: payment.id });
+          }
+
+          if (!donation) {
+            // Completely missing from our DB — create recovery record
+            try {
+              donation = await Donation.create({
+                razorpayPaymentId: payment.id,
+                razorpayOrderId:   payment.order_id,
+                donorName:         payment.email || payment.contact || 'Anonymous (cron recovery)',
+                donorEmail:        payment.email    || 'unknown@cron.recovery',
+                donorPhone:        payment.contact  || 'N/A',
+                amount:            payment.amount / 100,
+                currency:          payment.currency || 'INR',
+                paymentStatus:     'completed',
+                paymentMethod:     payment.method,
+                metadata: {
+                  syncedFromRazorpay: true,
+                  status: payment.status
+                }
+              });
+              console.log(`[Cron] Created missing record for payment ${payment.id} — donationId: ${donation._id}`);
+              recovered++;
+              await syncToDhanunjaya(donation);
+
+            } catch (createErr) {
+              // Likely a duplicate key race condition — log and continue
+              console.error(`[Cron] Could not create record for payment ${payment.id}:`, createErr.message);
+            }
+
+          } else if (donation.paymentStatus !== 'completed') {
+            // Exists as pending but Razorpay says captured — fix it
+            await Donation.findByIdAndUpdate(donation._id, {
+              paymentStatus:     'completed',
+              razorpayPaymentId: payment.id,
+              updatedAt:         new Date()
+            });
+            donation = await Donation.findById(donation._id);
+            console.log(`[Cron] Fixed pending → completed for donation ${donation._id}`);
+            recovered++;
+            await syncToDhanunjaya(donation);
+
+          } else if (donation.dhanunjayaSyncFailed === true) {
+            // Completed but Dhanunjaya sync previously failed — retry
+            console.log(`[Cron] Retrying Dhanunjaya sync for completed donation ${donation._id}`);
+            await syncToDhanunjaya(donation);
+            syncRetried++;
+
+          } else {
+            alreadyOk++;
+          }
+        }
+
+        // Pagination
+        if (payments.length < limit) break;
+        skip += limit;
+        if (skip >= 10000) {
+          console.warn('[Cron] Hit 10,000 payment safety cap — stopping pagination');
+          break;
+        }
+      }
+
+      // ── Part 2: Retry ALL flagged Dhanunjaya failures (includes PayU payments too) ──
+      const failedSyncs = await Donation.find({
+        paymentStatus:        'completed',
+        dhanunjayaSyncFailed: true
+      }).limit(50);
+
+      if (failedSyncs.length > 0) {
+        console.log(`[Cron] Found ${failedSyncs.length} donations with dhanunjayaSyncFailed=true — retrying`);
+        for (const d of failedSyncs) {
+          await syncToDhanunjaya(d);
+          syncRetried++;
+        }
+      }
+
+      console.log(
+        `[Cron] ─── Done ─── recovered: ${recovered} | dhanunjayaSyncRetried: ${syncRetried} | alreadyOk: ${alreadyOk}`
+      );
+
+    } catch (err) {
+      console.error('[Cron] Unhandled reconciliation error:', err.message, err.stack);
+    }
+  });
+
+  console.log('[Cron] Razorpay reconciliation job scheduled — runs every 30 minutes');
+};
+
+// ── getLastSyncTime — returns real last cron/sync timestamp ──────────
+const getLastSyncTime = async (req, res) => {
+  try {
+    // Find most recently updated synced-from-razorpay record
+    const lastSynced = await Donation.findOne(
+      { 'metadata.syncedFromRazorpay': true },
+      { updatedAt: 1 }
+    ).sort({ updatedAt: -1 });
+
+    // Find cron marker record if it exists
+    const cronMarker = await Donation.findOne(
+      { 'metadata.isCronMarker': true },
+      { 'metadata.lastCronRun': 1 }
+    );
+
+    // Find most recently completed donation overall
+    const lastCompleted = await Donation.findOne(
+      { paymentStatus: 'completed' },
+      { updatedAt: 1 }
+    ).sort({ updatedAt: -1 });
+
+    res.json({
+      success: true,
+      lastCronRun:       cronMarker?.metadata?.lastCronRun || null,
+      lastSyncedRecord:  lastSynced?.updatedAt || null,
+      lastCompletedTime: lastCompleted?.updatedAt || null,
+      serverTime:        new Date()
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 module.exports = {
   createDonationOrder,
   verifyDonationPayment,
@@ -2336,7 +2711,8 @@ module.exports = {
   payuSuccess,
   payuFailure,
   verifyPayUPayment,
-  downloadDonationFormData
+  downloadDonationFormData,
+  handleRazorpayWebhook,
+  startRazorpayCronJob,
+  getLastSyncTime
 };
-
-

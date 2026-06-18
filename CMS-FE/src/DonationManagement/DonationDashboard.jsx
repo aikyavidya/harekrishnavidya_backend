@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FaHeart,
@@ -35,6 +35,8 @@ const DonationDashboard = () => {
   const [syncMessage, setSyncMessage] = useState('');
   const [exporting, setExporting] = useState(false);
   const [exportMessage, setExportMessage] = useState('');
+  const [lastSyncTime, setLastSyncTime] = useState('Loading...');
+  const [razorpayConnected, setRazorpayConnected] = useState(null); // null = checking
 
   useEffect(() => {
     fetchDashboardData();
@@ -59,6 +61,41 @@ const DonationDashboard = () => {
       if (donationsData.success) {
         setRecentDonations(donationsData.donations);
       }
+
+      // Fetch real last sync time
+      try {
+        const syncTimeRes = await fetch(getApiUrl('api/donations/last-sync-time'));
+        const syncTimeData = await syncTimeRes.json();
+        if (syncTimeData.success) {
+          // Use whichever timestamp is most recent
+          const times = [
+            syncTimeData.lastCronRun,
+            syncTimeData.lastSyncedRecord,
+            syncTimeData.lastCompletedTime
+          ].filter(Boolean).map(t => new Date(t));
+          
+          if (times.length > 0) {
+            const mostRecent = new Date(Math.max(...times));
+            setLastSyncTime(mostRecent.toLocaleDateString('en-IN', {
+              day: '2-digit', month: 'short', year: 'numeric',
+              hour: '2-digit', minute: '2-digit'
+            }));
+          } else {
+            setLastSyncTime('Not yet synced');
+          }
+        }
+      } catch (e) {
+        setLastSyncTime('Unable to fetch');
+      }
+
+      // Check real Razorpay connection status
+      try {
+        const connRes = await fetch(getApiUrl('api/donations/test-connection'));
+        const connData = await connRes.json();
+        setRazorpayConnected(connData.success === true);
+      } catch (e) {
+        setRazorpayConnected(false);
+      }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -72,17 +109,23 @@ const DonationDashboard = () => {
       setSyncing(true);
       setSyncMessage('Syncing donations from Razorpay...');
 
-      const response = await fetch(getApiUrl('api/donations/sync-razorpay'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      // Send last 7 days by default — prevents timeout on large datasets
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        .toISOString().split('T')[0];
+      const today = new Date().toISOString().split('T')[0];
+
+      const response = await fetch(
+        getApiUrl(`api/donations/sync-razorpay?startDate=${sevenDaysAgo}&endDate=${today}`),
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
         }
-      });
+      );
 
       const data = await response.json();
 
       if (data.success) {
-        setSyncMessage(`✅ Successfully synced ${data.syncedCount} new donations from Razorpay!`);
+        setSyncMessage(`✅ Synced last 7 days — ${data.syncedCount} new donations recovered from Razorpay`);
         // Refresh dashboard data after sync
         await fetchDashboardData();
       } else {
@@ -372,7 +415,7 @@ const DonationDashboard = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Active Donors</p>
               <p className="text-2xl font-bold text-gray-900">
-                {recentDonations.length}
+                {stats.activeDonors ?? 0}
               </p>
             </div>
             <div className="p-3 bg-orange-100 rounded-full">
@@ -381,7 +424,7 @@ const DonationDashboard = () => {
           </div>
           <div className="mt-4">
             <span className="text-sm text-orange-600 font-medium">
-              Recent donors
+              Last 30 days
             </span>
           </div>
         </div>
@@ -394,8 +437,17 @@ const DonationDashboard = () => {
             Razorpay Integration Status
           </h3>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span className="text-sm text-green-600 font-medium">Connected</span>
+            <div className={`w-2 h-2 rounded-full ${
+              razorpayConnected === null ? 'bg-gray-400' :
+              razorpayConnected ? 'bg-green-500' : 'bg-red-500'
+            }`}></div>
+            <span className={`text-sm font-medium ${
+              razorpayConnected === null ? 'text-gray-500' :
+              razorpayConnected ? 'text-green-600' : 'text-red-600'
+            }`}>
+              {razorpayConnected === null ? 'Checking...' :
+               razorpayConnected ? 'Connected' : 'Connection Failed'}
+            </span>
           </div>
         </div>
 
@@ -408,7 +460,7 @@ const DonationDashboard = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Last Sync</p>
                 <p className="text-sm text-gray-900">
-                  {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}
+                  {lastSyncTime}
                 </p>
               </div>
             </div>
@@ -564,16 +616,18 @@ const DonationDashboard = () => {
                   <div className="bg-white rounded-lg p-4 shadow-sm">
                     <h4 className="font-medium text-gray-900 mb-2">Payment Methods</h4>
                     <div className="space-y-2">
-                      {Object.entries(recentDonations.reduce((acc, donation) => {
-                        const method = donation.paymentMethod || 'Unknown';
-                        acc[method] = (acc[method] || 0) + 1;
-                        return acc;
-                      }, {})).map(([method, count]) => (
-                        <div key={method} className="flex justify-between text-sm">
-                          <span className="text-gray-600">{method.toUpperCase()}</span>
-                          <span className="font-medium">{count}</span>
-                        </div>
-                      ))}
+                      {(stats.paymentMethods || []).length === 0 ? (
+                        <p className="text-sm text-gray-500">No completed payments yet</p>
+                      ) : (
+                        (stats.paymentMethods || []).map((item) => (
+                          <div key={item._id || 'unknown'} className="flex justify-between text-sm">
+                            <span className="text-gray-600">
+                              {(item._id || 'Unknown').toUpperCase()}
+                            </span>
+                            <span className="font-medium">{item.count}</span>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
 

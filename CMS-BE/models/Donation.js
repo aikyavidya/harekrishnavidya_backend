@@ -176,6 +176,10 @@ const donationSchema = new mongoose.Schema({
     status: String
   },
 
+  // ── Dhanunjaya Sync Tracking ──────────────────────────────────────────
+  dhanunjayaSynced:     { type: Boolean, default: false },
+  dhanunjayaSyncFailed: { type: Boolean, default: false },
+
   // Timestamps
   createdAt: {
     type: Date,
@@ -191,12 +195,11 @@ const donationSchema = new mongoose.Schema({
 
 // Indexes for better query performance
 // Remove the unique constraint from razorpayPaymentId and razorpayOrderId
-donationSchema.index({ razorpayPaymentId: 1 }, { sparse: true });
-donationSchema.index({ razorpayOrderId: 1 }, { sparse: true });
 donationSchema.index({ donorEmail: 1 });
 donationSchema.index({ paymentStatus: 1 });
 donationSchema.index({ createdAt: -1 });
 donationSchema.index({ sevaType: 1 });
 donationSchema.index({ donorType: 1 });
+donationSchema.index({ dhanunjayaSyncFailed: 1 });
 
 module.exports = mongoose.model('Donation', donationSchema);

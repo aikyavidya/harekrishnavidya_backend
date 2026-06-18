@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const router = express.Router();
 const {
   createDonationOrder,
@@ -20,7 +20,9 @@ const {
   payuSuccess,
   payuFailure,
   verifyPayUPayment,
-  downloadDonationFormData
+  downloadDonationFormData,
+  handleRazorpayWebhook,
+  getLastSyncTime
 } = require('../controllers/donationController');
 
 // Public routes (for donation processing)
@@ -44,11 +46,15 @@ router.get('/payu-success', payuSuccess);
 router.post('/payu-failure', payuFailure);
 router.get('/payu-failure', payuFailure);
 
+// ── Razorpay Webhook (server-to-server from Razorpay, raw body verified inside handler) ──
+router.post('/razorpay-webhook', handleRazorpayWebhook);
+
 // Admin routes (protected - you may want to add auth middleware)
 router.get('/', getAllDonations);
 router.get('/stats', getDonationStats);
 router.get('/seva-stats', getSevaStats);
 router.get('/test-connection', testRazorpayConnection);
+router.get('/last-sync-time', getLastSyncTime);
 router.get('/test-email', testEmailService);
 router.get('/export/form-submissions', downloadDonationFormData);
 router.get('/:id', getDonationById);
