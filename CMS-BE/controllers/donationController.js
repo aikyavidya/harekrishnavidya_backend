@@ -629,33 +629,13 @@ const forceSyncAllPayments = async (req, res) => {
         }
 
         // Check if donation already exists
-        const existingDonation = await Donation.findOne({
-          razorpayPaymentId: payment.id
-        });
-
-        const donationData = {
-          razorpayPaymentId: payment.id,
-          razorpayOrderId: payment.order_id,
-          donorName: payment.email || payment.contact || 'Anonymous',
-          donorEmail: payment.email || `no-email-${payment.id}@razorpay.recovery`,
-          donorPhone: payment.contact || 'N/A',
-          amount: payment.amount / 100,
-          currency: payment.currency,
-          paymentStatus: paymentStatus,
-          paymentMethod: payment.method,
-          receipt: payment.receipt,
-          metadata: {
-            paymentMethod: payment.method,
-            bank: payment.bank,
-            cardId: payment.card_id,
-            wallet: payment.wallet,
-            vpa: payment.vpa,
-            email: payment.email,
-            contact: payment.contact,
-            status: payment.status,
-            syncedFromRazorpay: true
-          }
-        };
+        let existingDonation = null;
+        if (payment.order_id) {
+          existingDonation = await Donation.findOne({ razorpayOrderId: payment.order_id });
+        }
+        if (!existingDonation && payment.id) {
+          existingDonation = await Donation.findOne({ razorpayPaymentId: payment.id });
+        }
 
         if (existingDonation) {
           // Update existing donation with latest data
@@ -669,9 +649,17 @@ if (existingDonation.paymentStatus === 'completed') {
   continue;
 }
 
-const updatedDonation = await Donation.findOneAndUpdate(
-  { razorpayPaymentId: payment.id },
-  donationData,
+const updatedDonation = await Donation.findByIdAndUpdate(
+  existingDonation._id,
+  {
+    paymentStatus: paymentStatus,
+    razorpayPaymentId: payment.id,
+    'metadata.status': payment.status,
+    'metadata.syncedFromRazorpay': true,
+    'metadata.paymentMethod': payment.method,
+    'metadata.email': payment.email,
+    'metadata.contact': payment.contact
+  },
   { new: true }
 );
 updatedCount++;
@@ -682,6 +670,42 @@ if (updatedDonation && updatedDonation.paymentStatus === 'completed') {
           console.log(`Updated existing payment: ${payment.id}`);
         } else {
           // Create new donation
+          const notes = payment.notes || {};
+          const donationData = {
+            razorpayPaymentId: payment.id,
+            razorpayOrderId: payment.order_id,
+            donorName: payment.email || payment.contact || 'Anonymous',
+            donorEmail: payment.email || `no-email-${payment.id}@razorpay.recovery`,
+            donorPhone: payment.contact || 'N/A',
+            amount: payment.amount / 100,
+            currency: payment.currency,
+            paymentStatus: paymentStatus,
+            paymentMethod: payment.method,
+            receipt: payment.receipt,
+            // From notes (only populated if donor filled address/PAN during form submission)
+            sevaName:       notes.sevaName     || null,
+            sevaType:       notes.sevaType     || null,
+            houseApartment: notes.houseApartment || null,
+            address:        notes.addressLine  || null,
+            village:        notes.village      || null,
+            district:       notes.district     || null,
+            state:          notes.state        || null,
+            pinCode:        notes.pinCode      || null,
+            panNumber:      notes.panNumber    || null,
+            wantsMahaPrasadam: false,
+            wants80G:       notes.panNumber ? true : false,
+            metadata: {
+              paymentMethod: payment.method,
+              bank: payment.bank,
+              cardId: payment.card_id,
+              wallet: payment.wallet,
+              vpa: payment.vpa,
+              email: payment.email,
+              contact: payment.contact,
+              status: payment.status,
+              syncedFromRazorpay: true
+            }
+          };
           const donation = new Donation(donationData);
           await donation.save();
 syncedCount++;
@@ -2584,6 +2608,7 @@ const startRazorpayCronJob = () => {
           if (!donation) {
             // Completely missing from our DB — create recovery record
             try {
+              const notes = payment.notes || {};
               donation = await Donation.create({
                 razorpayPaymentId: payment.id,
                 razorpayOrderId:   payment.order_id,
@@ -2594,6 +2619,18 @@ const startRazorpayCronJob = () => {
                 currency:          payment.currency || 'INR',
                 paymentStatus:     'completed',
                 paymentMethod:     payment.method,
+                // From notes (only populated if donor filled address/PAN during form submission)
+                sevaName:       notes.sevaName     || null,
+                sevaType:       notes.sevaType     || null,
+                houseApartment: notes.houseApartment || null,
+                address:        notes.addressLine  || null,
+                village:        notes.village      || null,
+                district:       notes.district     || null,
+                state:          notes.state        || null,
+                pinCode:        notes.pinCode      || null,
+                panNumber:      notes.panNumber    || null,
+                wantsMahaPrasadam: false,
+                wants80G:       notes.panNumber ? true : false,
                 metadata: {
                   syncedFromRazorpay: true,
                   status: payment.status
@@ -2613,6 +2650,8 @@ const startRazorpayCronJob = () => {
             await Donation.findByIdAndUpdate(donation._id, {
               paymentStatus:     'completed',
               razorpayPaymentId: payment.id,
+              'metadata.status': payment.status,
+              'metadata.syncedFromRazorpay': true,
               updatedAt:         new Date()
             });
             donation = await Donation.findById(donation._id);
