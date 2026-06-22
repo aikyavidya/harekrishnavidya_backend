@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   FaHeart, 
   FaUser, 
+  FaMapMarkerAlt,
   FaEnvelope, 
   FaPhone, 
   FaRupeeSign, 
@@ -335,6 +336,72 @@ const DonationView = () => {
                 </div>
               )}
             </div>
+
+            {/* Seva & Address Details */}
+            {(donation.wantsMahaPrasadam || donation.wants80G || donation.houseApartment || donation.address || donation.village || donation.district || donation.state || donation.pinCode || donation.landmark || donation.panNumber) && (
+              <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <FaMapMarkerAlt className="w-5 h-5 text-orange-500" />
+                  Seva & Address Details
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Row 1: Seva Name / Seva Type */}
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Seva Name</p>
+                    <p className="font-medium text-gray-900">{donation.sevaName || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Seva Type</p>
+                    <p className="font-medium text-gray-900">{donation.sevaType || 'N/A'}</p>
+                  </div>
+
+                  {/* Row 2: Maha Prasadam / 80G */}
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Maha Prasadam Requested</p>
+                    {donation.wantsMahaPrasadam ? (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Yes</span>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">No</span>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">80G Tax Exemption</p>
+                    {donation.wants80G ? (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Yes</span>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">No</span>
+                    )}
+                  </div>
+
+                  {/* Row 3: Delivery Address (full width, only if any address field) */}
+                  {[donation.houseApartment, donation.address, donation.village, donation.district, donation.state, donation.pinCode].some(Boolean) && (
+                    <div className="md:col-span-2">
+                      <p className="text-sm text-gray-600 mb-1">Delivery Address</p>
+                      <p className="font-medium text-gray-900">
+                        {[donation.houseApartment, donation.address, donation.village, donation.district, donation.state, donation.pinCode].filter(Boolean).join(', ') || 'N/A'}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Row 4: Landmark (only if populated) */}
+                  {donation.landmark && (
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">Landmark</p>
+                      <p className="font-medium text-gray-900">{donation.landmark}</p>
+                    </div>
+                  )}
+
+                  {/* Row 5: PAN Number (only if populated) */}
+                  {donation.panNumber && (
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">PAN Number</p>
+                      <p className="font-mono font-medium text-gray-900">{donation.panNumber}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Payment Details */}
             <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">

@@ -189,7 +189,19 @@ const DonationList = () => {
           'Date',
           'Time',
           'Payment ID',
-          'Anonymous'
+          'Anonymous',
+          'Seva Name',
+          'Seva Type',
+          'Wants Maha Prasadam',
+          'Wants 80G',
+          'House/Apartment',
+          'Address Line',
+          'Village',
+          'District',
+          'State',
+          'Pin Code',
+          'Landmark',
+          'PAN Number'
         ];
 
         // CSV rows
@@ -206,7 +218,19 @@ const DonationList = () => {
             date.toLocaleDateString('en-IN'),
             date.toLocaleTimeString('en-IN'),
             `"${d.razorpayPaymentId || 'N/A'}"`,
-            d.isAnonymous ? 'Yes' : 'No'
+            d.isAnonymous ? 'Yes' : 'No',
+            `"${(d.sevaName || '').replace(/"/g, '""')}"`,
+            `"${(d.sevaType || '').replace(/"/g, '""')}"`,
+            d.wantsMahaPrasadam ? 'Yes' : 'No',
+            d.wants80G ? 'Yes' : 'No',
+            `"${(d.houseApartment || '').replace(/"/g, '""')}"`,
+            `"${(d.address || '').replace(/"/g, '""')}"`,
+            `"${(d.village || '').replace(/"/g, '""')}"`,
+            `"${(d.district || '').replace(/"/g, '""')}"`,
+            `"${(d.state || '').replace(/"/g, '""')}"`,
+            `"${(d.pinCode || '').replace(/"/g, '""')}"`,
+            `"${(d.landmark || '').replace(/"/g, '""')}"`,
+            `"${(d.panNumber || '').replace(/"/g, '""')}"`
           ];
         });
 
@@ -378,6 +402,12 @@ const DonationList = () => {
                         {getSortIcon('paymentMethod')}
                       </div>
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Prasadam
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      80G
+                    </th>
                     <th
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                       onClick={() => handleSort('createdAt')}
@@ -452,6 +482,24 @@ const DonationList = () => {
                             {donation.paymentMethod || 'N/A'}
                           </span>
                         </div>
+                      </td>
+
+                      {/* Prasadam */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {donation.wantsMahaPrasadam ? (
+                          <span className="text-xs font-medium text-green-700 bg-green-100 px-2 py-1 rounded-full">● Yes</span>
+                        ) : (
+                          <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">● No</span>
+                        )}
+                      </td>
+
+                      {/* 80G */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {donation.wants80G ? (
+                          <span className="text-xs font-medium text-green-700 bg-green-100 px-2 py-1 rounded-full">● Yes</span>
+                        ) : (
+                          <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">● No</span>
+                        )}
                       </td>
 
                       {/* Date */}
