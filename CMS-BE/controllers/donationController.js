@@ -1241,7 +1241,15 @@ const submitDonationForm = async (req, res) => {
           sevaName,
           sevaType,
           donorName,
-          donorEmail
+          donorEmail,
+          ...(wantsMahaPrasadam && {
+            donorAddress: [houseApartment, address, village, district, state, pinCode]
+              .filter(Boolean)
+              .join(', ') || 'N/A'
+          }),
+          ...(wants80G && {
+            panNumber: panNumber || 'N/A'
+          })
         }
       };
 
