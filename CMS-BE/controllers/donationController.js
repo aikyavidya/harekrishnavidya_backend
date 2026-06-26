@@ -1149,6 +1149,20 @@ const submitDonationForm = async (req, res) => {
     try {
       await donation.save();
       console.log('✅ [submitDonationForm] Donation saved to database:', donation._id);
+      console.log('FULL SAVED DONATION:', JSON.stringify({
+        _id: donation._id,
+        areaOfStay: donation.areaOfStay,
+        locality: donation.locality,
+        country: donation.country,
+        houseApartment: donation.houseApartment,
+        address: donation.address,
+        district: donation.district,
+        state: donation.state,
+        pinCode: donation.pinCode,
+        panNumber: donation.panNumber,
+        wantsMahaPrasadam: donation.wantsMahaPrasadam,
+        wants80G: donation.wants80G
+      }, null, 2));
     } catch (dbError) {
       console.error('Database error:', dbError);
 
