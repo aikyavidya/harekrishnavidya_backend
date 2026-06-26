@@ -1062,9 +1062,7 @@ const submitDonationForm = async (req, res) => {
       if (!address || address.trim().length < 5) {
         return res.status(400).json({ success: false, message: 'Address Line 2 must be at least 5 characters' });
       }
-      if (!village || village.trim().length < 2) {
-        return res.status(400).json({ success: false, message: 'City/Village is required (min 2 characters)' });
-      }
+
       if (!district || district.trim().length < 2) {
         return res.status(400).json({ success: false, message: 'District is required (min 2 characters)' });
       }
