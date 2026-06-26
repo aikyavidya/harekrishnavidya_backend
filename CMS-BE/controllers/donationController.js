@@ -32,8 +32,8 @@ const syncToDhanunjaya = async (donation, retries = 3) => {
     mobile:     donation.donorPhone || "N/A",
     email:      donation.donorEmail || "N/A",
     address:    [
-                  donation.houseApartment, donation.address, donation.village,
-                  donation.district, donation.state, donation.pinCode
+                  donation.houseApartment, donation.address, donation.locality, donation.village,
+                  donation.district, donation.state, donation.pinCode, donation.country
                 ].filter(Boolean).join(', ') || "N/A",
     amount:       donation.amount,
     seva:         mappedSevaCode,
@@ -41,13 +41,14 @@ const syncToDhanunjaya = async (donation, retries = 3) => {
     atg_required: isAtgRequired,
     trust:        "HKM India - Sadasivpet",
     preacher:     "WEB",
+    areaOfStay:   donation.areaOfStay || "N/A",
     separated_address: {
       type:           "Residential",
       address_line_1: donation.houseApartment || "",
       address_line_2: donation.address || "",
-      city:           donation.village || "N/A",
+      city:           donation.locality || donation.village || "N/A",
       state:          donation.state || "N/A",
-      country:        "India",
+      country:        donation.country || "India",
       pin_code:       donation.pinCode || "N/A"
     }
   };
@@ -1004,7 +1005,10 @@ const submitDonationForm = async (req, res) => {
       state,
       pinCode,
       landmark,
-      panNumber
+      panNumber,
+      areaOfStay,
+      locality,
+      country
     } = req.body;
 
     // Validate required fields
@@ -1132,6 +1136,9 @@ const submitDonationForm = async (req, res) => {
       pinCode,
       landmark,
       panNumber,
+      areaOfStay: areaOfStay || null,
+      locality: locality || null,
+      country: country || null,
       paymentStatus: 'pending'
     };
 
@@ -1266,8 +1273,9 @@ const submitDonationForm = async (req, res) => {
           sevaType,
           donorName,
           donorEmail,
+          areaOfStay: areaOfStay || 'N/A',
           ...(wantsMahaPrasadam && {
-            donorAddress: [houseApartment, address, village, district, state, pinCode]
+            donorAddress: [houseApartment, address, locality, village, district, state, pinCode, country]
               .filter(Boolean)
               .join(', ') || 'N/A'
           }),

@@ -141,6 +141,21 @@ const donationSchema = new mongoose.Schema({
     required: false,
     uppercase: true
   },
+  areaOfStay: {
+    type: String,
+    trim: true,
+    required: false
+  },
+  locality: {
+    type: String,
+    trim: true,
+    required: false
+  },
+  country: {
+    type: String,
+    trim: true,
+    required: false
+  },
 
   // UTM Tracking Parameters
   utmSource: {
