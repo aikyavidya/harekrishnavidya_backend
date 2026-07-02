@@ -639,7 +639,7 @@ const CampaignForm = () => {
                                         <div className="space-y-6">
                                             <div>
                                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                                    The Problem <span className="text-red-500">*</span>
+                                                    The Cause <span className="text-red-500">*</span>
                                                 </label>
                                                 <textarea
                                                     value={formData.story.fullStory}
