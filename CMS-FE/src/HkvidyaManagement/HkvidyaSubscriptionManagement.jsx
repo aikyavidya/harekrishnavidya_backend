@@ -142,6 +142,9 @@ const HkvidyaSubscriptionManagement = () => {
   };
 
   const handlePushDhanunjaya = async (subId) => {
+    const sub = subscriptions.find(s => s.razorpay_subscription_id === subId);
+    if (sub && sub.payment_status?.toLowerCase() !== 'active') return;
+
     try {
       toast.loading('Pushing to Dhanunjaya...', { id: 'push' });
       const response = await fetch(getApiUrl(`api/hkvidya-subscriptions/${subId}/push-dhanunjaya`), {
@@ -290,6 +293,9 @@ const HkvidyaSubscriptionManagement = () => {
                   const currentAddress = edits.fullAddress !== undefined ? edits.fullAddress : (sub.overlay?.fullAddress || [sub.address_line_1, sub.address_line_2, sub.city, sub.state, sub.country, sub.pincode].filter(Boolean).join(', ') || '');
                   const currentEmployee = edits.assignedEmployee !== undefined ? edits.assignedEmployee : (sub.overlay?.assignedEmployee || '');
 
+                  const isActive = sub.payment_status?.toLowerCase() === 'active';
+                  const disabledTooltip = "Only active subscriptions can be edited or pushed to Dhanunjaya";
+
                   return (
                     <tr key={subId} className="hover:bg-gray-50 transition-colors duration-150">
                       {/* Donor */}
@@ -315,7 +321,9 @@ const HkvidyaSubscriptionManagement = () => {
                           type="checkbox"
                           checked={current80G}
                           onChange={(e) => handleEditChange(subId, 'wants80G', e.target.checked)}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          disabled={!isActive}
+                          title={!isActive ? disabledTooltip : undefined}
+                          className={`w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 ${!isActive ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : ''}`}
                         />
                       </td>
 
@@ -326,7 +334,9 @@ const HkvidyaSubscriptionManagement = () => {
                           value={currentPan}
                           onChange={(e) => handleEditChange(subId, 'panNumber', e.target.value.toUpperCase())}
                           placeholder="PAN"
-                          className="w-28 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                          disabled={!isActive}
+                          title={!isActive ? disabledTooltip : undefined}
+                          className={`w-28 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 ${!isActive ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : ''}`}
                         />
                       </td>
 
@@ -337,7 +347,9 @@ const HkvidyaSubscriptionManagement = () => {
                           onChange={(e) => handleEditChange(subId, 'fullAddress', e.target.value)}
                           placeholder="Full Address"
                           rows={2}
-                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 resize-none"
+                          disabled={!isActive}
+                          title={!isActive ? disabledTooltip : undefined}
+                          className={`w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 resize-none ${!isActive ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : ''}`}
                         />
                       </td>
 
@@ -348,7 +360,9 @@ const HkvidyaSubscriptionManagement = () => {
                           value={currentEmployee}
                           onChange={(e) => handleEditChange(subId, 'assignedEmployee', e.target.value)}
                           placeholder="Employee"
-                          className="w-28 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                          disabled={!isActive}
+                          title={!isActive ? disabledTooltip : undefined}
+                          className={`w-28 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 ${!isActive ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : ''}`}
                         />
                       </td>
 
@@ -360,7 +374,7 @@ const HkvidyaSubscriptionManagement = () => {
                       {/* Actions */}
                       <td className="px-4 py-3 whitespace-nowrap text-right text-sm">
                         <div className="flex flex-col items-end gap-2">
-                          {isEdited && (
+                          {isEdited && isActive && (
                             <button
                               onClick={() => handleSaveRow(subId)}
                               className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-xs w-full justify-center"
@@ -370,7 +384,9 @@ const HkvidyaSubscriptionManagement = () => {
                           )}
                           <button
                             onClick={() => handlePushDhanunjaya(subId)}
-                            className="flex items-center gap-1 px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-xs w-full justify-center"
+                            disabled={!isActive}
+                            title={!isActive ? disabledTooltip : undefined}
+                            className={`flex items-center gap-1 px-2 py-1 text-white rounded text-xs w-full justify-center ${!isActive ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'}`}
                           >
                             <FaUpload /> Push to DJ
                           </button>
