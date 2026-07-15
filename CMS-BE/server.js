@@ -100,6 +100,7 @@ app.use("/api/donations", (req, res, next) => {
 });
 
 app.use("/api/donations", require("./routes/donationRoutes"));
+app.use("/api/hkvidya-subscriptions", require("./routes/hkvidyaRoutes"));
 
 // Banner Routing
 app.use("/api/banner", require("./routes/bannerRoutes"));

@@ -43,6 +43,7 @@ import UTMTrackingDashboard from "./DonationManagement/UTMTrackingDashboard";
 import DonationKitManagement from "./DonationKitManagement/DonationKitManagement";
 import DonationKitList from "./DonationKitManagement/DonationKitList";
 import DonationKitForm from "./DonationKitManagement/DonationKitForm";
+import HkvidyaSubscriptionManagement from "./HkvidyaManagement/HkvidyaSubscriptionManagement";
 
 // Grocery Item Management Components
 import GroceryItemList from "./GroceryItemManagement/GroceryItemList";
@@ -199,6 +200,10 @@ function AppWrapper() {
               <Route
                 path="/donation-management"
                 element={<DonationDashboard />}
+              />
+              <Route
+                path="/hkvidya-subscriptions"
+                element={<HkvidyaSubscriptionManagement />}
               />
               <Route
                 path="/donation-management/create"

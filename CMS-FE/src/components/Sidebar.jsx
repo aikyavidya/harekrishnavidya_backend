@@ -143,6 +143,12 @@ const Sidebar = () => {
       color: 'from-blue-300 to-blue-200'
     },
     {
+      path: '/hkvidya-subscriptions',
+      icon: <FaClipboardList className="text-blue-900" />,
+      label: 'hkvidya Subscriptions',
+      color: 'from-blue-300 to-blue-200'
+    },
+    {
       path: '/utm-tracking-dashboard',
       icon: <FaChartBar className="text-blue-900" />,
       label: 'UTM Tracking Dashboard',
