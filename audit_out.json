@@ -1,0 +1,410 @@
+[
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/home/page.tsx",
+    "status": "B",
+    "missing": [],
+    "notes": "Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/about-us/page.tsx",
+    "status": "B",
+    "missing": [],
+    "notes": "Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/our-initiative/page.tsx",
+    "status": "B",
+    "missing": [],
+    "notes": "Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/contact/page.tsx",
+    "status": "B",
+    "missing": [],
+    "notes": "Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/donate-to-cause/page.tsx",
+    "status": "B",
+    "missing": [],
+    "notes": "Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/grocery-donation/page.tsx",
+    "status": "B",
+    "missing": [],
+    "notes": "Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/campaign-page/page.tsx",
+    "status": "B",
+    "missing": [],
+    "notes": "Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/donation-kit/page.tsx",
+    "status": "B",
+    "missing": [],
+    "notes": "Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/donor-wall/page.tsx",
+    "status": "B",
+    "missing": [
+      "donorWall.tier.${key}",
+      "donorWall.tier.${tierMap[donors[0].tier] || \"supporter\"}"
+    ],
+    "notes": "Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/photo-gallery/page.tsx",
+    "status": "B",
+    "missing": [],
+    "notes": "Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/video-gallery/page.tsx",
+    "status": "B",
+    "missing": [],
+    "notes": "Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/blog/page.tsx",
+    "status": "A",
+    "missing": [
+      "T"
+    ],
+    "notes": "Looks fully translated"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/blog/[slug]/page.tsx",
+    "status": "C",
+    "missing": [],
+    "notes": "No useLanguage import, No t() calls"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/terms-conditions/page.tsx",
+    "status": "C",
+    "missing": [],
+    "notes": "No useLanguage import, No t() calls, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/policies/page.tsx",
+    "status": "C",
+    "missing": [],
+    "notes": "No useLanguage import, No t() calls, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/career/page.tsx",
+    "status": "B",
+    "missing": [
+      "career.form.nameRequired",
+      "career.form.emailRequired",
+      "career.form.emailInvalid",
+      "career.form.phoneRequired",
+      "career.form.phoneInvalid",
+      "career.form.positionRequired",
+      "career.form.genderRequired",
+      "career.form.qualificationRequired",
+      "career.form.experienceRequired",
+      "career.form.experienceInvalid",
+      "career.form.cityRequired",
+      "career.form.hearAboutRequired",
+      "career.form.messageRequired",
+      "career.form.messageTooShort",
+      "career.form.cvRequired",
+      "career.form.errorSubmitFailed",
+      "career.form.errorFallback",
+      "career.form.cvInvalidType",
+      "career.hero.badge",
+      "career.hero.heading",
+      "career.hero.description",
+      "career.benefits.spiritualTitle",
+      "career.benefits.spiritualDesc",
+      "career.benefits.impactTitle",
+      "career.benefits.impactDesc",
+      "career.benefits.flexibleTitle",
+      "career.benefits.flexibleDesc",
+      "career.openings.heading",
+      "career.openings.subheading",
+      "career.openings.teacherTitle",
+      "career.openings.teacherDesc",
+      "career.openings.teacherLocation",
+      "career.openings.volunteerTitle",
+      "career.openings.volunteerDesc",
+      "career.openings.volunteerLocation",
+      "career.form.badge",
+      "career.form.subheading",
+      "career.form.successMessage",
+      "career.form.nameLabel",
+      "career.form.namePlaceholder",
+      "career.form.emailLabel",
+      "career.form.emailPlaceholder",
+      "career.form.phoneLabel",
+      "career.form.phonePlaceholder",
+      "career.form.genderLabel",
+      "career.form.genderPlaceholder",
+      "career.form.genderFemale",
+      "career.form.genderMale",
+      "career.form.genderPreferNotToSay",
+      "career.form.qualificationLabel",
+      "career.form.qualificationPlaceholder",
+      "career.form.qualification10th",
+      "career.form.qualification12th",
+      "career.form.qualificationDiploma",
+      "career.form.qualificationGraduate",
+      "career.form.qualificationPostGraduate",
+      "career.form.qualificationOther",
+      "career.form.positionLabel",
+      "career.form.positionPlaceholder",
+      "career.form.experienceLabel",
+      "career.form.experiencePlaceholder",
+      "career.form.cityLabel",
+      "career.form.cityPlaceholder",
+      "career.form.hearAboutLabel",
+      "career.form.hearAboutPlaceholder",
+      "career.form.hearAboutTemple",
+      "career.form.hearAboutFriend",
+      "career.form.hearAboutSocial",
+      "career.form.hearAboutWebsite",
+      "career.form.hearAboutEvent",
+      "career.form.hearAboutOther",
+      "career.form.messageLabel",
+      "career.form.messagePlaceholder",
+      "career.form.cvLabel",
+      "career.form.cvSubtext",
+      "career.form.submitting",
+      "career.form.submitDefault"
+    ],
+    "notes": "Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/donate/page.tsx",
+    "status": "B",
+    "missing": [
+      "purpose",
+      "amount",
+      "payment",
+      "paymentMethod",
+      "donationId",
+      "txnid",
+      "reason",
+      ".",
+      "donate.error.invalidEmail",
+      "donate.error.areaOfStayRequired",
+      "donate.error.address1Required",
+      "donate.error.address1MinLength",
+      "donate.error.pinRequired",
+      "donate.error.pinDigits",
+      "donate.error.panRequiredFor80g",
+      "form",
+      "input",
+      "donate.summary.sevaName",
+      "donate.summary.sevaType",
+      "donate.summary.sevaAmount",
+      "donate.label.donorName",
+      "donate.placeholder.yourName",
+      "donate.label.mobileNumber",
+      "donate.placeholder.yourPhone",
+      "donate.label.emailId",
+      "donate.placeholder.yourEmail",
+      "donate.label.areaOfStay",
+      "donate.placeholder.cityOrArea",
+      "donate.label.paymentOption",
+      "donate.radio.indianCitizen",
+      "donate.radio.foreignCitizen",
+      "donate.checkbox.mahaPrasadam",
+      "donate.warning.mahaPrasadamMinAmount",
+      "donate.checkbox.taxExemption80g",
+      "donate.warning.taxExemptionMinAmount",
+      "donate.notice.financeAct80g",
+      "donate.heading.address",
+      "donate.label.panNumber",
+      "donate.label.addressLine1",
+      "donate.label.addressLine2",
+      "donate.label.pinCode",
+      "donate.placeholder.pinCode",
+      "donate.placeholder.enterPinFirst",
+      "donate.button.processing",
+      "donate.button.donateNow"
+    ],
+    "notes": "Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/donation/page.tsx",
+    "status": "B",
+    "missing": [
+      "Annadan Seva - Any Amount"
+    ],
+    "notes": "Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/refund/page.jsx",
+    "status": "A",
+    "missing": [
+      "refund.heading",
+      "refund.paragraph",
+      "refund.listItem1",
+      "refund.listItem2",
+      "refund.noteLabel",
+      "refund.noteDesktop",
+      "refund.noteMobile"
+    ],
+    "notes": "Looks fully translated"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/components/mainheader.tsx",
+    "status": "B",
+    "missing": [],
+    "notes": "Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/components/Footer.tsx",
+    "status": "B",
+    "missing": [],
+    "notes": "Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/build-school/page.tsx",
+    "status": "C",
+    "missing": [
+      "id",
+      "Please select an amount to donate",
+      "Thank you! Your donation was completed successfully.",
+      ""
+    ],
+    "notes": "No useLanguage import, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/campaign/[id]/page.tsx",
+    "status": "C",
+    "missing": [
+      "Please select an amount to donate",
+      "Thank you! Your donation was completed successfully.",
+      ""
+    ],
+    "notes": "No useLanguage import, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/certificates/page.tsx",
+    "status": "C",
+    "missing": [
+      "script",
+      "/ISKON.pdf",
+      "2d"
+    ],
+    "notes": "No useLanguage import, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/donation-kit/general-support/page.tsx",
+    "status": "C",
+    "missing": [
+      "script"
+    ],
+    "notes": "No useLanguage import, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/donation-kit/[slug]/page.tsx",
+    "status": "C",
+    "missing": [
+      "quantity",
+      "total",
+      "script"
+    ],
+    "notes": "No useLanguage import, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/events/page.tsx",
+    "status": "C",
+    "missing": [
+      "page"
+    ],
+    "notes": "No useLanguage import, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/events/[slug]/page.tsx",
+    "status": "C",
+    "missing": [],
+    "notes": "No useLanguage import, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/gallery/page.tsx",
+    "status": "C",
+    "missing": [],
+    "notes": "No useLanguage import, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/governance/page.tsx",
+    "status": "C",
+    "missing": [],
+    "notes": "No useLanguage import, No t() calls, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/grocery-checkout/page.tsx",
+    "status": "C",
+    "missing": [
+      "selectionId"
+    ],
+    "notes": "No useLanguage import, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/page.tsx",
+    "status": "C",
+    "missing": [],
+    "notes": "No useLanguage import, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/r/donations/page.tsx",
+    "status": "C",
+    "missing": [],
+    "notes": "No useLanguage import, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/sponsorships/page.tsx",
+    "status": "C",
+    "missing": [],
+    "notes": "No useLanguage import, No t() calls, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/support-compaign/page.tsx",
+    "status": "C",
+    "missing": [
+      "id",
+      "",
+      "Thank you! Your donation of ₹${amount.toLocaleString(\"en-IN"
+    ],
+    "notes": "No useLanguage import, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/trust/page.tsx",
+    "status": "C",
+    "missing": [],
+    "notes": "No useLanguage import, No t() calls, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/u/donations/page.tsx",
+    "status": "C",
+    "missing": [],
+    "notes": "No useLanguage import, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/urban/page.tsx",
+    "status": "C",
+    "missing": [],
+    "notes": "No useLanguage import, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/volunteer/page.tsx",
+    "status": "C",
+    "missing": [],
+    "notes": "No useLanguage import, No t() calls, Likely contains hardcoded English text in JSX"
+  },
+  {
+    "file": "c:/Aikya Vidya/projects/harekrishnavidya_website/Harekrishnavidya_website/app/[campaign]/page.tsx",
+    "status": "C",
+    "missing": [
+      "/?utm_source=AIKYA&utm_medium=SMS&utm_campaign=${campaign}"
+    ],
+    "notes": "No useLanguage import"
+  }
+]

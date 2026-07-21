@@ -44,6 +44,9 @@ import DonationKitManagement from "./DonationKitManagement/DonationKitManagement
 import DonationKitList from "./DonationKitManagement/DonationKitList";
 import DonationKitForm from "./DonationKitManagement/DonationKitForm";
 import HkvidyaSubscriptionManagement from "./HkvidyaManagement/HkvidyaSubscriptionManagement";
+import DhanunjayaSyncLog from "./HkvidyaManagement/DhanunjayaSyncLog";
+import BulkDhanunjayaPush from "./HkvidyaManagement/BulkDhanunjayaPush";
+import HkvidyaSubscriptionDetail from "./HkvidyaManagement/HkvidyaSubscriptionDetail";
 
 // Grocery Item Management Components
 import GroceryItemList from "./GroceryItemManagement/GroceryItemList";
@@ -204,6 +207,18 @@ function AppWrapper() {
               <Route
                 path="/hkvidya-subscriptions"
                 element={<HkvidyaSubscriptionManagement />}
+              />
+              <Route
+                path="/dhanunjaya-sync-log"
+                element={<DhanunjayaSyncLog />}
+              />
+              <Route
+                path="/bulk-dhanunjaya-push"
+                element={<BulkDhanunjayaPush />}
+              />
+              <Route
+                path="/hkvidya-subscriptions/view/:subscriptionId"
+                element={<HkvidyaSubscriptionDetail />}
               />
               <Route
                 path="/donation-management/create"

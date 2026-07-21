@@ -20,7 +20,9 @@ import {
   FaHeart,
   FaEnvelopeOpenText,
   FaBullhorn,
-  FaImage
+  FaImage,
+  FaHistory,
+  FaFileExcel
 } from 'react-icons/fa';
 import logo from '../assets/DTG.png'
 import logo2 from '../../public/logo.png'
@@ -142,12 +144,7 @@ const Sidebar = () => {
       label: 'Razorpay Donation Management',
       color: 'from-blue-300 to-blue-200'
     },
-    {
-      path: '/hkvidya-subscriptions',
-      icon: <FaClipboardList className="text-blue-900" />,
-      label: 'hkvidya Subscriptions',
-      color: 'from-blue-300 to-blue-200'
-    },
+
     {
       path: '/utm-tracking-dashboard',
       icon: <FaChartBar className="text-blue-900" />,
@@ -197,6 +194,25 @@ const Sidebar = () => {
     //   label: 'Home Banner',
     //   color: 'from-blue-300 to-blue-200'
     // },
+    { type: 'divider' },
+    {
+      path: '/hkvidya-subscriptions',
+      icon: <FaClipboardList className="text-blue-900" />,
+      label: 'hkvidya Subscriptions',
+      color: 'from-blue-300 to-blue-200'
+    },
+    {
+      path: '/dhanunjaya-sync-log',
+      icon: <FaHistory className="text-blue-900" />,
+      label: 'Dhanunjaya Sync Log',
+      color: 'from-blue-300 to-blue-200'
+    },
+    {
+      path: '/bulk-dhanunjaya-push',
+      icon: <FaFileExcel className="text-blue-900" />,
+      label: 'Bulk Dhanunjaya Push',
+      color: 'from-blue-300 to-blue-200'
+    }
   ];
 
   // Mobile toggle button
@@ -268,9 +284,11 @@ const Sidebar = () => {
 
         {/* Navigation */}
         <nav className="mt-3 px-3 overflow-y-auto h-[calc(100%-180px)]">
-          {sidebarRoutes.map((route) => (
-            <div key={route.path}>
-              {route.hasSubmenu ? (
+          {sidebarRoutes.map((route, index) => (
+            <div key={route.path || `divider-${index}`}>
+              {route.type === 'divider' ? (
+                <div className="border-b border-gray-300 my-3"></div>
+              ) : route.hasSubmenu ? (
                 // Menu item with submenu
                 <div>
                   <button
