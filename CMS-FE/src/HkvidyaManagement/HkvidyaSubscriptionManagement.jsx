@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getApiUrl } from '../api/api';
+import { Link, useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import {
   FaHeart,
@@ -17,6 +18,7 @@ import {
 import { FcOk } from "react-icons/fc";
 
 const HkvidyaSubscriptionManagement = () => {
+  const navigate = useNavigate();
   const [subscriptions, setSubscriptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -31,15 +33,31 @@ const HkvidyaSubscriptionManagement = () => {
   const [editedRows, setEditedRows] = useState({});
   const [dryRunPayload, setDryRunPayload] = useState(null);
   const [jumpToPage, setJumpToPage] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOrder, setSortOrder] = useState('latest');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedAccount, setSelectedAccount] = useState('teja');
 
   useEffect(() => {
-    fetchSubscriptions(pagination.page);
-  }, [pagination.page]);
+    const delayDebounceFn = setTimeout(() => {
+      fetchSubscriptions(pagination.page);
+    }, 500);
+    return () => clearTimeout(delayDebounceFn);
+  }, [pagination.page, searchTerm, sortOrder, selectedCategory, selectedAccount]);
 
   const fetchSubscriptions = async (page) => {
     try {
       setLoading(true);
-      const response = await fetch(getApiUrl(`api/hkvidya-subscriptions?page=${page}&limit=${pagination.limit}`));
+      const queryParams = new URLSearchParams({
+        page: page,
+        limit: pagination.limit,
+        search: searchTerm,
+        sort: sortOrder,
+        category: selectedCategory,
+        account: selectedAccount
+      }).toString();
+      
+      const response = await fetch(getApiUrl(`api/hkvidya-subscriptions?${queryParams}`));
       const data = await response.json();
       
       if (data.success) {
@@ -255,6 +273,41 @@ const HkvidyaSubscriptionManagement = () => {
       )}
 
       {/* Table */}
+      <div className="flex gap-4 mb-4 items-center flex-wrap">
+        <select
+          className="border p-2 rounded-lg font-medium text-blue-700 bg-blue-50 border-blue-200 min-w-[220px]"
+          value={selectedAccount}
+          onChange={(e) => { setSelectedAccount(e.target.value); setPagination(prev => ({ ...prev, page: 1 })); }}
+        >
+          <option value="teja">Teja Account (Current)</option>
+          <option value="shsd">SHSD Account (Historical)</option>
+        </select>
+        <input
+          type="text"
+          placeholder="Search by ID, Name, or Email..."
+          className="border p-2 flex-grow rounded-lg"
+          value={searchTerm}
+          onChange={(e) => { setSearchTerm(e.target.value); setPagination(prev => ({ ...prev, page: 1 })); }}
+        />
+        <select
+          className="border p-2 rounded-lg"
+          value={selectedCategory}
+          onChange={(e) => { setSelectedCategory(e.target.value); setPagination(prev => ({ ...prev, page: 1 })); }}
+        >
+          <option value="All">All Categories</option>
+          <option value="active">Active</option>
+          <option value="pending">Pending</option>
+          <option value="cancelled">Halted / Cancelled</option>
+        </select>
+        <select
+          className="border p-2 rounded-lg"
+          value={sortOrder}
+          onChange={(e) => { setSortOrder(e.target.value); setPagination(prev => ({ ...prev, page: 1 })); }}
+        >
+          <option value="latest">Latest Created</option>
+          <option value="oldest">Oldest Created</option>
+        </select>
+      </div>
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-gray-500">
@@ -297,12 +350,18 @@ const HkvidyaSubscriptionManagement = () => {
                   const disabledTooltip = "Only active subscriptions can be edited or pushed to Dhanunjaya";
 
                   return (
-                    <tr key={subId} className="hover:bg-gray-50 transition-colors duration-150">
+                    <tr 
+                      key={subId} 
+                      className="hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
+                      onClick={() => navigate(`/hkvidya-subscriptions/view/${sub.razorpay_subscription_id}`)}
+                    >
                       {/* Donor */}
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{sub.full_name}</div>
-                        <div className="text-xs text-gray-500">{sub.email}</div>
-                        <div className="text-xs text-gray-500">{sub.phone}</div>
+                        <div className="block hover:bg-gray-100 -m-2 p-2 rounded transition-colors duration-200">
+                          <div className="text-sm font-medium text-blue-600 hover:text-blue-800">{sub.full_name}</div>
+                          <div className="text-xs text-gray-500">{sub.email}</div>
+                          <div className="text-xs text-gray-500">{sub.phone}</div>
+                        </div>
                       </td>
 
                       {/* Amount */}
@@ -320,6 +379,7 @@ const HkvidyaSubscriptionManagement = () => {
                         <input
                           type="checkbox"
                           checked={current80G}
+                          onClick={(e) => e.stopPropagation()}
                           onChange={(e) => handleEditChange(subId, 'wants80G', e.target.checked)}
                           disabled={!isActive}
                           title={!isActive ? disabledTooltip : undefined}
@@ -332,6 +392,7 @@ const HkvidyaSubscriptionManagement = () => {
                         <input
                           type="text"
                           value={currentPan}
+                          onClick={(e) => e.stopPropagation()}
                           onChange={(e) => handleEditChange(subId, 'panNumber', e.target.value.toUpperCase())}
                           placeholder="PAN"
                           disabled={!isActive}
@@ -344,6 +405,7 @@ const HkvidyaSubscriptionManagement = () => {
                       <td className="px-4 py-3">
                         <textarea
                           value={currentAddress}
+                          onClick={(e) => e.stopPropagation()}
                           onChange={(e) => handleEditChange(subId, 'fullAddress', e.target.value)}
                           placeholder="Full Address"
                           rows={2}
@@ -358,6 +420,7 @@ const HkvidyaSubscriptionManagement = () => {
                         <input
                           type="text"
                           value={currentEmployee}
+                          onClick={(e) => e.stopPropagation()}
                           onChange={(e) => handleEditChange(subId, 'assignedEmployee', e.target.value)}
                           placeholder="Employee"
                           disabled={!isActive}
@@ -376,14 +439,14 @@ const HkvidyaSubscriptionManagement = () => {
                         <div className="flex flex-col items-end gap-2">
                           {isEdited && isActive && (
                             <button
-                              onClick={() => handleSaveRow(subId)}
+                              onClick={(e) => { e.stopPropagation(); handleSaveRow(subId); }}
                               className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-xs w-full justify-center"
                             >
                               <FaSave /> Save
                             </button>
                           )}
                           <button
-                            onClick={() => handlePushDhanunjaya(subId)}
+                            onClick={(e) => { e.stopPropagation(); handlePushDhanunjaya(subId); }}
                             disabled={!isActive}
                             title={!isActive ? disabledTooltip : undefined}
                             className={`flex items-center gap-1 px-2 py-1 text-white rounded text-xs w-full justify-center ${!isActive ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'}`}

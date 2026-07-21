@@ -24,5 +24,7 @@ const hkvidyaOverlaySchema = new mongoose.Schema({
   syncLog: [syncLogSchema]
 }, { timestamps: true });
 
-// Use default mongoose connection
-module.exports = mongoose.model('HkvidyaOverlay', hkvidyaOverlaySchema);
+const hkvidyaConnection = require('../config/hkvidyaConnection');
+
+// Use dedicated hkvidya connection instead of default mongoose connection
+module.exports = hkvidyaConnection.model('HkvidyaOverlay', hkvidyaOverlaySchema);

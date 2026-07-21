@@ -32,9 +32,11 @@ const hkvidyaSubscriptionSchema = new mongoose.Schema({
   wants_80g: { type: Boolean },
   razorpay_order_id: { type: String },
   razorpay_subscription_id: { type: String },
+  razorpay_start_at: { type: Date },
   payment_mode: { type: String },
   payment_status: { type: String },
   recurring_payments: [recurringPaymentSchema],
+  accountSource: { type: String, default: 'teja' },
   created_at: { type: Date }
 }, { 
   collection: 'donations',
